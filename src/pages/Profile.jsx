@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { User as UserIcon, UserPlus, UserMinus, UserCheck, UserX, Heart, MessageSquare } from 'lucide-react';
+import { User as UserIcon, UserPlus, UserMinus, UserCheck, UserX, Heart, MessageSquare, Edit2 } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 
 const Profile = () => {
@@ -11,7 +11,9 @@ const Profile = () => {
     const [friends, setFriends] = useState([]);
     const [posts, setPosts] = useState([]);
     const [notFound, setNotFound] = useState(false);
-    const { token, user } = useAuth();
+    const [isEditingBio, setIsEditingBio] = useState(false);
+    const [editBioText, setEditBioText] = useState('');
+    const { token, user, refreshUser } = useAuth();
 
     const isCurrentUser = user && (user.username === username || username === 'me');
 
@@ -215,6 +217,37 @@ const Profile = () => {
         }
     };
 
+    useEffect(() => {
+        if (profile) {
+            setEditBioText(profile.bio || '');
+        }
+    }, [profile]);
+
+    const handleSaveBio = async () => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/users/me`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ bio: editBioText })
+            });
+            if (response.ok) {
+                const updatedUser = await response.json();
+                setProfile({ ...profile, bio: updatedUser.bio });
+                setIsEditingBio(false);
+                if (refreshUser) {
+                    refreshUser();
+                }
+            } else {
+                console.error("Failed to save bio");
+            }
+        } catch (e) {
+            console.error("Error saving bio", e);
+        }
+    };
+
     if (notFound) {
         return (
             <div className="container mt-4" style={{ maxWidth: 600 }}>
@@ -309,9 +342,50 @@ const Profile = () => {
                     </Link>
                 )}
                 <h2 className="text-xl">{profile.username}</h2>
-                <p className="text-secondary text-center" style={{ maxWidth: 400 }}>
-                    {profile.bio || "No bio available."}
-                </p>
+                {isEditingBio ? (
+                    <div style={{ width: '100%', maxWidth: '400px', display: 'flex', flexDirection: 'column', gap: '8px', margin: '8px 0' }}>
+                        <textarea
+                            className="textarea"
+                            value={editBioText}
+                            onChange={(e) => setEditBioText(e.target.value)}
+                            placeholder="Tell us about yourself..."
+                            maxLength={500}
+                            style={{ width: '100%', minHeight: '80px', resize: 'vertical' }}
+                        />
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                            <button 
+                                className="btn btn-ghost text-sm" 
+                                onClick={() => { setIsEditingBio(false); setEditBioText(profile.bio || ''); }}
+                                style={{ padding: '4px 8px' }}
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                className="btn btn-primary text-sm" 
+                                onClick={handleSaveBio}
+                                style={{ padding: '4px 8px' }}
+                            >
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                ) : (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center', maxWidth: '100%', padding: '0 1rem' }}>
+                        <p className="text-secondary text-center" style={{ maxWidth: 400, margin: 0, wordBreak: 'break-word' }}>
+                            {profile.bio || "No bio available."}
+                        </p>
+                        {isCurrentUser && (
+                            <button 
+                                onClick={() => setIsEditingBio(true)}
+                                className="btn btn-ghost" 
+                                style={{ padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                title="Edit Bio"
+                            >
+                                <Edit2 size={14} color="var(--text-secondary)" />
+                            </button>
+                        )}
+                    </div>
+                )}
                 <div className="flex-center gap-4 mt-4">
                     <div className="text-center">
                         <div className="text-lg">{friends.length}</div>
