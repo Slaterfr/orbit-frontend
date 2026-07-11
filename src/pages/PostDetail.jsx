@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { MessageSquare, Heart, Edit2, Trash2, User as UserIcon } from 'lucide-react';
+import { API_BASE_URL } from '../config';
 
 const CommentItem = ({ comment, onReply, onVote, onEdit, onDelete, currentUser }) => {
     const [isEditing, setIsEditing] = useState(false);
@@ -138,7 +139,7 @@ const PostDetail = () => {
 
     const fetchPost = async () => {
         try {
-            const response = await fetch(`http://127.0.0.1:8000/posts/${id}`, {
+            const response = await fetch(`${API_BASE_URL}/posts/${id}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (response.ok) {
@@ -146,7 +147,7 @@ const PostDetail = () => {
 
                 // Fetch vote stats for this post
                 try {
-                    const statsRes = await fetch(`http://127.0.0.1:8000/vote/post/${id}`, {
+                    const statsRes = await fetch(`${API_BASE_URL}/vote/post/${id}`, {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
                     if (statsRes.ok) {
@@ -166,7 +167,7 @@ const PostDetail = () => {
 
     const fetchComments = async () => {
         try {
-            const response = await fetch(`http://127.0.0.1:8000/comments/${id}`, {
+            const response = await fetch(`${API_BASE_URL}/comments/${id}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (response.ok) {
@@ -175,7 +176,7 @@ const PostDetail = () => {
                 // Fetch stats for each comment
                 const commentsWithStats = await Promise.all(data.map(async (c) => {
                     try {
-                        const statsRes = await fetch(`http://127.0.0.1:8000/vote/comment/${c.id}`, {
+                        const statsRes = await fetch(`${API_BASE_URL}/vote/comment/${c.id}`, {
                             headers: { 'Authorization': `Bearer ${token}` }
                         });
                         if (statsRes.ok) {
@@ -225,7 +226,7 @@ const PostDetail = () => {
                 post_id: id,
                 parent_id: replyTo
             };
-            const response = await fetch('http://127.0.0.1:8000/comments/', {
+            const response = await fetch(`${API_BASE_URL}/comments/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -245,7 +246,7 @@ const PostDetail = () => {
 
     const handlePostVote = async () => {
         try {
-            const response = await fetch('http://127.0.0.1:8000/vote/', {
+            const response = await fetch(`${API_BASE_URL}/vote/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -264,7 +265,7 @@ const PostDetail = () => {
     const handleUpdatePost = async (e) => {
         e.preventDefault();
         try {
-            const response = await fetch(`http://127.0.0.1:8000/posts/${id}`, {
+            const response = await fetch(`${API_BASE_URL}/posts/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -284,7 +285,7 @@ const PostDetail = () => {
     const handleDeletePost = async () => {
         if (window.confirm("Are you sure you want to delete this post?")) {
             try {
-                const response = await fetch(`http://127.0.0.1:8000/posts/${id}`, {
+                const response = await fetch(`${API_BASE_URL}/posts/${id}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -299,7 +300,7 @@ const PostDetail = () => {
 
     const handleEditComment = async (commentId, content) => {
         try {
-            const response = await fetch(`http://127.0.0.1:8000/comments/${commentId}`, {
+            const response = await fetch(`${API_BASE_URL}/comments/${commentId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -318,7 +319,7 @@ const PostDetail = () => {
     const handleDeleteComment = async (commentId) => {
         if (window.confirm("Are you sure you want to delete this comment?")) {
             try {
-                const response = await fetch(`http://127.0.0.1:8000/comments/${commentId}`, {
+                const response = await fetch(`${API_BASE_URL}/comments/${commentId}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -478,7 +479,7 @@ const PostDetail = () => {
                             comment={comment}
                             onReply={(id) => setReplyTo(id)}
                             onVote={async (cid) => {
-                                const response = await fetch('http://127.0.0.1:8000/vote/comment', {
+                                const response = await fetch(`${API_BASE_URL}/vote/comment`, {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                                     body: JSON.stringify({ comment_id: cid })

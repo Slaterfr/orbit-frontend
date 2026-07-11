@@ -1,4 +1,5 @@
 import { createContext, useState, useEffect, useContext } from 'react';
+import { API_BASE_URL } from '../config';
 
 const AuthContext = createContext();
 
@@ -26,7 +27,7 @@ export const AuthProvider = ({ children }) => {
     const refreshUser = async () => {
         if (token) {
             try {
-                const response = await fetch('http://127.0.0.1:8000/users/me', {
+                const response = await fetch(`${API_BASE_URL}/users/me`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (response.ok) {
@@ -39,12 +40,12 @@ export const AuthProvider = ({ children }) => {
             }
         }
     };
-
+ 
     useEffect(() => {
         const verifyTokenOnMount = async () => {
             if (token) {
                 try {
-                    const response = await fetch('http://127.0.0.1:8000/users/me', {
+                    const response = await fetch(`${API_BASE_URL}/users/me`, {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
                     if (response.ok) {

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { UserPlus } from 'lucide-react';
+import { API_BASE_URL } from '../config';
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -17,7 +18,7 @@ const Register = () => {
         setError('');
 
         try {
-            const response = await fetch('http://127.0.0.1:8000/users/', {
+            const response = await fetch(`${API_BASE_URL}/users/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

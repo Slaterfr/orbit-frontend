@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { MessageSquare, Heart, Share2, User as UserIcon, Camera, X } from 'lucide-react';
+import { API_BASE_URL } from '../config';
 
 const Feed = () => {
     const [posts, setPosts] = useState([]);
@@ -34,7 +35,7 @@ const Feed = () => {
 
     const fetchPosts = async () => {
         try {
-            const response = await fetch('http://127.0.0.1:8000/posts/', {
+            const response = await fetch(`${API_BASE_URL}/posts/`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (response.ok) {
@@ -43,7 +44,7 @@ const Feed = () => {
                 // Fetch stats for each post to merge vote_count and user_voted
                 const postsWithStats = await Promise.all(postsData.map(async (post) => {
                     try {
-                        const statsRes = await fetch(`http://127.0.0.1:8000/vote/post/${post.id}`, {
+                        const statsRes = await fetch(`${API_BASE_URL}/vote/post/${post.id}`, {
                             headers: { 'Authorization': `Bearer ${token}` }
                         });
                         if (statsRes.ok) {
@@ -79,7 +80,7 @@ const Feed = () => {
                 const formData = new FormData();
                 formData.append('file', selectedFile);
 
-                const uploadRes = await fetch('http://127.0.0.1:8000/posts/upload', {
+                const uploadRes = await fetch(`${API_BASE_URL}/posts/upload`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -96,7 +97,7 @@ const Feed = () => {
                 mediaIds = [uploadData.id];
             }
 
-            const response = await fetch('http://127.0.0.1:8000/posts/', {
+            const response = await fetch(`${API_BASE_URL}/posts/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -124,7 +125,7 @@ const Feed = () => {
 
     const handleVote = async (postId) => {
         try {
-            const response = await fetch('http://127.0.0.1:8000/vote/', {
+            const response = await fetch(`${API_BASE_URL}/vote/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

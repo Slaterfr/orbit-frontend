@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Upload, X, ArrowLeft, Camera } from 'lucide-react';
+import { API_BASE_URL } from '../config';
 
 const UploadAvatar = () => {
     const { token, user, refreshUser } = useAuth();
@@ -50,7 +51,7 @@ const UploadAvatar = () => {
         formData.append('file', selectedFile);
 
         try {
-            const response = await fetch('http://127.0.0.1:8000/users/me/avatar', {
+            const response = await fetch(`${API_BASE_URL}/users/me/avatar`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`

@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Home, User, LogOut, Bell, Check, X, Search } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useState, useEffect, useRef } from 'react';
+import { API_BASE_URL } from '../config';
 
 const Navbar = () => {
     const { logout, user, token } = useAuth();
@@ -24,7 +25,7 @@ const Navbar = () => {
     const fetchNotifications = async () => {
         if (!token) return;
         try {
-            const response = await fetch('http://127.0.0.1:8000/notifications', {
+            const response = await fetch(`${API_BASE_URL}/notifications`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (response.ok) {
@@ -57,7 +58,7 @@ const Navbar = () => {
 
     const handleRespondRequest = async (friendshipId, statusValue) => {
         try {
-            const response = await fetch(`http://127.0.0.1:8000/friendships/${friendshipId}/status`, {
+            const response = await fetch(`${API_BASE_URL}/friendships/${friendshipId}/status`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -83,7 +84,7 @@ const Navbar = () => {
 
         setLookupLoading(true);
         try {
-            const response = await fetch(`http://127.0.0.1:8000/users/profile/${username}`, {
+            const response = await fetch(`${API_BASE_URL}/users/profile/${username}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (response.ok) {

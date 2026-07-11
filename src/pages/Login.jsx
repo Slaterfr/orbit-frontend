@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { LogIn } from 'lucide-react';
 import { parseJwt } from '../utils';
+import { API_BASE_URL } from '../config';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -20,7 +21,7 @@ const Login = () => {
             formData.append('username', email); // OAuth2PasswordRequestForm expects 'username' field, usually mapped to email
             formData.append('password', password);
 
-            const response = await fetch('http://127.0.0.1:8000/auth/login', {
+            const response = await fetch(`${API_BASE_URL}/auth/login`, {
                 method: 'POST',
                 body: formData,
             });

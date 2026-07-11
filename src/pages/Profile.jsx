@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { User as UserIcon, UserPlus, UserMinus, UserCheck, UserX, Heart, MessageSquare } from 'lucide-react';
+import { API_BASE_URL } from '../config';
 
 const Profile = () => {
     const { username } = useParams();
@@ -16,7 +17,7 @@ const Profile = () => {
 
     const fetchFriendsList = async (targetId) => {
         try {
-            const response = await fetch(`http://127.0.0.1:8000/friendships/friends/${targetId}/profiles`, {
+            const response = await fetch(`${API_BASE_URL}/friendships/friends/${targetId}/profiles`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (response.ok) {
@@ -30,7 +31,7 @@ const Profile = () => {
 
     const fetchFriendshipStatus = async (targetId) => {
         try {
-            const response = await fetch(`http://127.0.0.1:8000/friendships/status/${targetId}`, {
+            const response = await fetch(`${API_BASE_URL}/friendships/status/${targetId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (response.ok) {
@@ -44,7 +45,7 @@ const Profile = () => {
 
     const fetchUserPosts = async (userId) => {
         try {
-            const response = await fetch(`http://127.0.0.1:8000/posts/?user_id=${userId}`, {
+            const response = await fetch(`${API_BASE_URL}/posts/?user_id=${userId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (response.ok) {
@@ -53,7 +54,7 @@ const Profile = () => {
                 // Fetch stats (likes/user_voted) for each post
                 const postsWithStats = await Promise.all(postsData.map(async (post) => {
                     try {
-                        const statsRes = await fetch(`http://127.0.0.1:8000/vote/post/${post.id}`, {
+                        const statsRes = await fetch(`${API_BASE_URL}/vote/post/${post.id}`, {
                             headers: { 'Authorization': `Bearer ${token}` }
                         });
                         if (statsRes.ok) {
@@ -79,8 +80,8 @@ const Profile = () => {
             setProfile(null);
             try {
                 const url = username === 'me' 
-                    ? `http://127.0.0.1:8000/users/me` 
-                    : `http://127.0.0.1:8000/users/profile/${username}`;
+                    ? `${API_BASE_URL}/users/me` 
+                    : `${API_BASE_URL}/users/profile/${username}`;
 
                 const response = await fetch(url, {
                     headers: { 'Authorization': `Bearer ${token}` }
@@ -114,7 +115,7 @@ const Profile = () => {
 
     const handleSendRequest = async () => {
         try {
-            const response = await fetch(`http://127.0.0.1:8000/friendships/`, {
+            const response = await fetch(`${API_BASE_URL}/friendships/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -132,7 +133,7 @@ const Profile = () => {
 
     const handleCancelRequest = async () => {
         try {
-            const response = await fetch(`http://127.0.0.1:8000/friendships/${friendship.id}`, {
+            const response = await fetch(`${API_BASE_URL}/friendships/${friendship.id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -146,7 +147,7 @@ const Profile = () => {
 
     const handleAcceptRequest = async () => {
         try {
-            const response = await fetch(`http://127.0.0.1:8000/friendships/${friendship.id}/status`, {
+            const response = await fetch(`${API_BASE_URL}/friendships/${friendship.id}/status`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -165,7 +166,7 @@ const Profile = () => {
 
     const handleRejectRequest = async () => {
         try {
-            const response = await fetch(`http://127.0.0.1:8000/friendships/${friendship.id}/status`, {
+            const response = await fetch(`${API_BASE_URL}/friendships/${friendship.id}/status`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -183,7 +184,7 @@ const Profile = () => {
 
     const handleUnfriend = async () => {
         try {
-            const response = await fetch(`http://127.0.0.1:8000/friendships/${friendship.id}`, {
+            const response = await fetch(`${API_BASE_URL}/friendships/${friendship.id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -198,7 +199,7 @@ const Profile = () => {
 
     const handleVote = async (postId) => {
         try {
-            const response = await fetch(`http://127.0.0.1:8000/vote/`, {
+            const response = await fetch(`${API_BASE_URL}/vote/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
