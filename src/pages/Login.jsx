@@ -38,7 +38,7 @@ const Login = () => {
                 role: decoded?.role
             }; 
 
-            login(userData, data.access_token);
+            login(userData, data.access_token, data.refresh_token);
             navigate('/');
         } catch (err) {
             setError('Invalid credentials');
