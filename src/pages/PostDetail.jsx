@@ -3,18 +3,20 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { MessageSquare, Heart, Edit2, Trash2, User as UserIcon } from 'lucide-react';
 import { API_BASE_URL } from '../config';
+import { useLanguage } from '../context/LanguageContext';
 
 const CommentItem = ({ comment, onReply, onVote, onEdit, onDelete, currentUser }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editContent, setEditContent] = useState(comment.content);
-
+    const { language, t } = useLanguage();
+ 
     const handleSave = () => {
         if (editContent.trim()) {
             onEdit(comment.id, editContent);
             setIsEditing(false);
         }
     };
-
+ 
     const isOwner = currentUser && String(currentUser.id) === String(comment.user_id);
     const isAdmin = currentUser && currentUser.role === 'admin';
 
@@ -45,10 +47,10 @@ const CommentItem = ({ comment, onReply, onVote, onEdit, onDelete, currentUser }
                 </div>
                 <span className="text-secondary" style={{ fontSize: '0.7rem' }}>
                     {new Date(comment.created_at).toLocaleDateString()}
-                    {comment.updated_at && ' (edited)'}
+                    {comment.updated_at && ` (${t('postDetail.edited')})`}
                 </span>
             </div>
-
+ 
             {isEditing ? (
                 <div className="mt-2">
                     <textarea
@@ -58,8 +60,8 @@ const CommentItem = ({ comment, onReply, onVote, onEdit, onDelete, currentUser }
                         rows={2}
                     />
                     <div className="flex-start gap-2">
-                        <button className="btn btn-primary text-xs" style={{ padding: '4px 8px' }} onClick={handleSave}>Save</button>
-                        <button className="btn btn-ghost text-xs" style={{ padding: '4px 8px' }} onClick={() => { setIsEditing(false); setEditContent(comment.content); }}>Cancel</button>
+                        <button className="btn btn-primary text-xs" style={{ padding: '4px 8px' }} onClick={handleSave}>{t('postDetail.save')}</button>
+                        <button className="btn btn-ghost text-xs" style={{ padding: '4px 8px' }} onClick={() => { setIsEditing(false); setEditContent(comment.content); }}>{t('postDetail.cancel')}</button>
                     </div>
                 </div>
             ) : (
@@ -82,9 +84,13 @@ const CommentItem = ({ comment, onReply, onVote, onEdit, onDelete, currentUser }
                         }}
                     >
                         <Heart size={14} fill={comment.user_voted ? '#ef4444' : 'none'} color={comment.user_voted ? '#ef4444' : 'currentColor'} />
-                        {comment.vote_count !== undefined ? `${comment.vote_count} Like${comment.vote_count !== 1 ? 's' : ''}` : 'Like'}
+                        {comment.vote_count !== undefined 
+                            ? `${comment.vote_count} ${comment.vote_count === 1 
+                                ? (language === 'en' ? 'Like' : 'Me gusta') 
+                                : (language === 'en' ? 'Likes' : 'Me gusta')}` 
+                            : (language === 'en' ? 'Like' : 'Me gusta')}
                     </button>
-                    {!isEditing && <button className="text-secondary text-sm" onClick={() => onReply(comment.id)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>Reply</button>}
+                    {!isEditing && <button className="text-secondary text-sm" onClick={() => onReply(comment.id)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>{t('postDetail.reply')}</button>}
                 </div>
 
                 {!isEditing && (isOwner || isAdmin) && (
@@ -132,6 +138,7 @@ const PostDetail = () => {
     const [newComment, setNewComment] = useState('');
     const [replyTo, setReplyTo] = useState(null);
     const { token, user } = useAuth();
+    const { language, t } = useLanguage();
 
     const [isEditingPost, setIsEditingPost] = useState(false);
     const [editPostTitle, setEditPostTitle] = useState('');
@@ -283,7 +290,7 @@ const PostDetail = () => {
     };
 
     const handleDeletePost = async () => {
-        if (window.confirm("Are you sure you want to delete this post?")) {
+        if (window.confirm(t('postDetail.deleteConfirm'))) {
             try {
                 const response = await fetch(`${API_BASE_URL}/posts/${id}`, {
                     method: 'DELETE',
@@ -317,7 +324,7 @@ const PostDetail = () => {
     };
 
     const handleDeleteComment = async (commentId) => {
-        if (window.confirm("Are you sure you want to delete this comment?")) {
+        if (window.confirm(t('postDetail.deleteCommentConfirm'))) {
             try {
                 const response = await fetch(`${API_BASE_URL}/comments/${commentId}`, {
                     method: 'DELETE',
@@ -332,7 +339,7 @@ const PostDetail = () => {
         }
     };
 
-    if (!post) return <div className="container mt-4">Loading...</div>;
+    if (!post) return <div className="container mt-4">{language === 'en' ? 'Loading...' : 'Cargando...'}</div>;
 
     return (
         <div className="container" style={{ maxWidth: 800 }}>
@@ -341,22 +348,22 @@ const PostDetail = () => {
                     <form onSubmit={handleUpdatePost}>
                         <input
                             className="input mb-4"
-                            placeholder="Title"
+                            placeholder={t('feed.postTitle')}
                             value={editPostTitle}
                             onChange={(e) => setEditPostTitle(e.target.value)}
                             required
                         />
                         <textarea
                             className="input mb-4"
-                            placeholder="Content"
+                            placeholder={t('feed.postPlaceholder')}
                             rows={5}
                             value={editPostContent}
                             onChange={(e) => setEditPostContent(e.target.value)}
                             required
                         />
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-                            <button className="btn btn-ghost" type="button" onClick={() => setIsEditingPost(false)}>Cancel</button>
-                            <button className="btn btn-primary" type="submit">Save</button>
+                            <button className="btn btn-ghost" type="button" onClick={() => setIsEditingPost(false)}>{t('postDetail.cancel')}</button>
+                            <button className="btn btn-primary" type="submit">{t('postDetail.save')}</button>
                         </div>
                     </form>
                 </div>
@@ -387,7 +394,7 @@ const PostDetail = () => {
                                 </Link>
                                 <div className="text-secondary" style={{ fontSize: '0.75rem' }}>
                                     {new Date(post.created_at).toLocaleDateString()}
-                                    {post.updated_at && ' (edited)'}
+                                    {post.updated_at && ` (${t('postDetail.edited')})`}
                                 </div>
                             </div>
                         </div>
@@ -448,7 +455,11 @@ const PostDetail = () => {
                         >
                             <Heart size={18} fill={post.user_voted ? '#ef4444' : 'none'} color={post.user_voted ? '#ef4444' : 'currentColor'} />
                             <span className="text-sm">
-                                {post.vote_count !== undefined ? `${post.vote_count} Like${post.vote_count !== 1 ? 's' : ''}` : 'Like'}
+                                {post.vote_count !== undefined 
+                                    ? `${post.vote_count} ${post.vote_count === 1 
+                                        ? (language === 'en' ? 'Like' : 'Me gusta') 
+                                        : (language === 'en' ? 'Likes' : 'Me gusta')}` 
+                                    : (language === 'en' ? 'Like' : 'Me gusta')}
                             </span>
                         </button>
                     </div>
@@ -456,19 +467,26 @@ const PostDetail = () => {
             )}
 
             <div className="card">
-                <h3 className="text-lg mb-4">Comments</h3>
-
+                <h3 className="text-lg mb-4">{t('postDetail.commentsSection')}</h3>
+ 
                 <form onSubmit={handleSubmitComment} className="mb-4">
-                    {replyTo && <div className="text-sm text-secondary mb-2">Replying to comment #{replyTo} <button type="button" onClick={() => setReplyTo(null)} style={{ color: 'var(--accent-secondary)' }}>Cancel</button></div>}
+                    {replyTo && (
+                        <div className="text-sm text-secondary mb-2">
+                            {t('postDetail.replyingTo')} #{replyTo}{' '}
+                            <button type="button" onClick={() => setReplyTo(null)} style={{ color: 'var(--accent-secondary)' }}>
+                                {t('postDetail.cancel')}
+                            </button>
+                        </div>
+                    )}
                     <div className="flex-start gap-2">
                         <input
                             className="input"
                             value={newComment}
                             onChange={(e) => setNewComment(e.target.value)}
-                            placeholder="Add a comment..."
+                            placeholder={t('postDetail.addComment')}
                             required
                         />
-                        <button type="submit" className="btn btn-primary">Post</button>
+                        <button type="submit" className="btn btn-primary">{t('postDetail.commentBtn')}</button>
                     </div>
                 </form>
 

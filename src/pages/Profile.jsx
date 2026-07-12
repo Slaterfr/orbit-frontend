@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { User as UserIcon, UserPlus, UserMinus, UserCheck, UserX, Heart, MessageSquare, Edit2 } from 'lucide-react';
 import { API_BASE_URL } from '../config';
+import { useLanguage } from '../context/LanguageContext';
 
 const Profile = () => {
     const { username } = useParams();
@@ -14,6 +15,7 @@ const Profile = () => {
     const [isEditingBio, setIsEditingBio] = useState(false);
     const [editBioText, setEditBioText] = useState('');
     const { token, user, refreshUser } = useAuth();
+    const { language, t } = useLanguage();
 
     const isCurrentUser = user && (
         username === 'me' || 
@@ -256,34 +258,34 @@ const Profile = () => {
         return (
             <div className="container mt-4" style={{ maxWidth: 600 }}>
                 <div className="card text-center" style={{ padding: '3rem' }}>
-                    <h2 className="text-xl mb-2" style={{ fontWeight: 600 }}>User Not Found</h2>
-                    <p className="text-secondary mb-6">The user "{username}" does not exist in Orbit.</p>
-                    <Link to="/" className="btn btn-primary">Go to Home Feed</Link>
+                    <h2 className="text-xl mb-2" style={{ fontWeight: 600 }}>{t('profile.notFound')}</h2>
+                    <p className="text-secondary mb-6">{language === 'en' ? `The user "${username}" does not exist in Orbit.` : `El usuario "${username}" no existe en Orbit.`}</p>
+                    <Link to="/" className="btn btn-primary">{t('profile.backHome')}</Link>
                 </div>
             </div>
         );
     }
 
-    if (!profile) return <div className="container mt-4">Loading...</div>;
+    if (!profile) return <div className="container mt-4">{language === 'en' ? 'Loading...' : 'Cargando...'}</div>;
 
     const renderFriendshipButton = () => {
         if (isCurrentUser) return null;
-
+ 
         if (!friendship) {
             return (
                 <button className="btn btn-primary flex-center gap-2" onClick={handleSendRequest}>
                     <UserPlus size={18} />
-                    <span>Send Friend Request</span>
+                    <span>{t('profile.status.none')}</span>
                 </button>
             );
         }
-
+ 
         if (friendship.status === 'pending') {
             if (friendship.requestor_id === user.id) {
                 return (
                     <button className="btn flex-center gap-2" style={{ backgroundColor: 'var(--error)', color: 'white' }} onClick={handleCancelRequest}>
                         <UserMinus size={18} />
-                        <span>Cancel Request</span>
+                        <span>{t('profile.cancelRequest')}</span>
                     </button>
                 );
             } else {
@@ -291,30 +293,30 @@ const Profile = () => {
                     <div className="flex-center gap-2">
                         <button className="btn btn-primary flex-center gap-2" onClick={handleAcceptRequest}>
                             <UserCheck size={18} />
-                            <span>Accept</span>
+                            <span>{t('navbar.accept')}</span>
                         </button>
                         <button className="btn flex-center gap-2" style={{ backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }} onClick={handleRejectRequest}>
                             <UserX size={18} />
-                            <span>Reject</span>
+                            <span>{t('navbar.decline')}</span>
                         </button>
                     </div>
                 );
             }
         }
-
+ 
         if (friendship.status === 'accepted') {
             return (
                 <button className="btn flex-center gap-2" style={{ backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }} onClick={handleUnfriend}>
                     <UserMinus size={18} />
-                    <span>Unfriend</span>
+                    <span>{t('profile.unfriend')}</span>
                 </button>
             );
         }
-
+ 
         if (friendship.status === 'blocked') {
-            return <div className="text-secondary text-sm font-semibold">User Blocked</div>;
+            return <div className="text-secondary text-sm font-semibold">{language === 'en' ? 'User Blocked' : 'Usuario Bloqueado'}</div>;
         }
-
+ 
         return null;
     };
 
@@ -342,7 +344,7 @@ const Profile = () => {
                 </div>
                 {isCurrentUser && (
                     <Link to="/upload-avatar" className="btn btn-ghost" style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', marginTop: '-8px' }}>
-                        Change Profile Picture
+                        {t('profile.changePic')}
                     </Link>
                 )}
                 <h2 className="text-xl">{profile.username}</h2>
@@ -352,7 +354,7 @@ const Profile = () => {
                             className="textarea"
                             value={editBioText}
                             onChange={(e) => setEditBioText(e.target.value)}
-                            placeholder="Tell us about yourself..."
+                            placeholder={t('profile.bioPlaceholder')}
                             maxLength={500}
                             style={{ width: '100%', minHeight: '80px', resize: 'vertical' }}
                         />
@@ -362,21 +364,21 @@ const Profile = () => {
                                 onClick={() => { setIsEditingBio(false); setEditBioText(profile.bio || ''); }}
                                 style={{ padding: '4px 8px' }}
                             >
-                                Cancel
+                                {t('profile.cancel')}
                             </button>
                             <button 
                                 className="btn btn-primary text-sm" 
                                 onClick={handleSaveBio}
                                 style={{ padding: '4px 8px' }}
                             >
-                                Save
+                                {t('profile.save')}
                             </button>
                         </div>
                     </div>
                 ) : (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center', maxWidth: '100%', padding: '0 1rem' }}>
                         <p className="text-secondary text-center" style={{ maxWidth: 400, margin: 0, wordBreak: 'break-word' }}>
-                            {profile.bio || "No bio available."}
+                            {profile.bio || t('profile.noBio')}
                         </p>
                         {isCurrentUser && (
                             <button 
@@ -393,28 +395,28 @@ const Profile = () => {
                 <div className="flex-center gap-4 mt-4">
                     <div className="text-center">
                         <div className="text-lg">{friends.length}</div>
-                        <div className="text-xs text-secondary">Friends</div>
+                        <div className="text-xs text-secondary">{t('profile.friends')}</div>
                     </div>
                     <div className="text-center">
                         <div className="text-lg">{posts.length}</div>
-                        <div className="text-xs text-secondary">Posts</div>
+                        <div className="text-xs text-secondary">{t('profile.posts')}</div>
                     </div>
                 </div>
-
+ 
                 <div className="mt-4 text-xs text-secondary">
-                    Joined {new Date(profile.created_at).toLocaleDateString()}
+                    {t('profile.joined')} {new Date(profile.created_at).toLocaleDateString()}
                 </div>
-
+ 
                 <div className="mt-4">
                     {renderFriendshipButton()}
                 </div>
             </div>
-
+ 
             {/* Friends Section */}
             <div className="card mt-4" style={{ width: '100%' }}>
-                <h3 className="text-lg mb-4">Friends ({friends.length})</h3>
+                <h3 className="text-lg mb-4">{t('profile.friends')} ({friends.length})</h3>
                 {friends.length === 0 ? (
-                    <p className="text-secondary text-sm">No friends yet.</p>
+                    <p className="text-secondary text-sm">{language === 'en' ? 'No friends yet.' : 'Aún no hay amigos.'}</p>
                 ) : (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '1rem' }}>
                         {friends.map(friend => (

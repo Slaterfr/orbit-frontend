@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { LogIn } from 'lucide-react';
 import { parseJwt } from '../utils';
 import { API_BASE_URL } from '../config';
+import { useLanguage } from '../context/LanguageContext';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -11,6 +12,7 @@ const Login = () => {
     const [error, setError] = useState('');
     const { login } = useAuth();
     const navigate = useNavigate();
+    const { language, toggleLanguage, t } = useLanguage();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -41,22 +43,32 @@ const Login = () => {
             login(userData, data.access_token, data.refresh_token);
             navigate('/');
         } catch (err) {
-            setError('Invalid credentials');
+            setError(t('auth.invalidCreds'));
             console.error(err);
         }
     };
 
     return (
-        <div className="flex-center" style={{ minHeight: '100vh', flexDirection: 'column' }}>
+        <div className="flex-center" style={{ minHeight: '100vh', flexDirection: 'column', position: 'relative' }}>
+            <div style={{ position: 'absolute', top: '24px', right: '24px' }}>
+                <button 
+                    onClick={toggleLanguage} 
+                    className="btn btn-ghost" 
+                    style={{ fontSize: '0.85rem', fontWeight: 'bold', minWidth: '40px', padding: '8px' }}
+                    title={language === 'en' ? "Switch to Spanish" : "Cambiar a Inglés"}
+                >
+                    {language.toUpperCase()}
+                </button>
+            </div>
             <div className="card" style={{ width: '100%', maxWidth: '400px' }}>
                 <div className="flex-center mb-4">
                     <LogIn size={40} color="var(--accent-primary)" />
                 </div>
-                <h2 className="text-xl flex-center mb-4">Welcome Back</h2>
+                <h2 className="text-xl flex-center mb-4">{t('auth.loginTitle')}</h2>
                 {error && <div style={{ color: 'var(--error)', marginBottom: '1rem', textAlign: 'center' }}>{error}</div>}
                 <form onSubmit={handleSubmit}>
                     <div className="mb-4">
-                        <label className="text-sm text-secondary">Email</label>
+                        <label className="text-sm text-secondary">{t('auth.email')}</label>
                         <input
                             type="email"
                             className="input mt-2"
@@ -66,7 +78,7 @@ const Login = () => {
                         />
                     </div>
                     <div className="mb-4">
-                        <label className="text-sm text-secondary">Password</label>
+                        <label className="text-sm text-secondary">{t('auth.password')}</label>
                         <input
                             type="password"
                             className="input mt-2"
@@ -76,12 +88,12 @@ const Login = () => {
                         />
                     </div>
                     <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
-                        Sign In
+                        {t('auth.loginBtn')}
                     </button>
                 </form>
                 <div className="mt-4 flex-center text-sm">
-                    <span className="text-secondary">Don't have an account?</span>
-                    <Link to="/register" style={{ marginLeft: '5px', color: 'var(--accent-primary)' }}>Sign up</Link>
+                    <span className="text-secondary">{t('auth.needAccount').split('?')[0]}?</span>
+                    <Link to="/register" style={{ marginLeft: '5px', color: 'var(--accent-primary)' }}>{t('auth.needAccount').split('?')[1].trim()}</Link>
                 </div>
             </div>
         </div>

@@ -3,10 +3,12 @@ import { Home, User, LogOut, Bell, Check, X, Search } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useState, useEffect, useRef } from 'react';
 import { API_BASE_URL } from '../config';
+import { useLanguage } from '../context/LanguageContext';
 
 const Navbar = () => {
     const { logout, user, token } = useAuth();
     const navigate = useNavigate();
+    const { language, toggleLanguage, t } = useLanguage();
     const [showNotifications, setShowNotifications] = useState(false);
     const [notifications, setNotifications] = useState([]);
     const dropdownRef = useRef(null);
@@ -129,7 +131,7 @@ const Navbar = () => {
                             style={{ padding: '8px 12px' }}
                         >
                             <Search size={20} />
-                            <span className="hide-mobile">User Lookup</span>
+                            <span className="hide-mobile">{t('navbar.lookup')}</span>
                         </button>
                     )}
 
@@ -142,6 +144,15 @@ const Navbar = () => {
                             <User size={20} />
                         </Link>
                     )}
+
+                    <button 
+                        onClick={toggleLanguage} 
+                        className="btn btn-ghost" 
+                        style={{ fontSize: '0.85rem', fontWeight: 'bold', minWidth: '40px', padding: '8px' }}
+                        title={language === 'en' ? "Switch to Spanish" : "Cambiar a Inglés"}
+                    >
+                        {language.toUpperCase()}
+                    </button>
 
                     {/* Friend Requests Bell */}
                     {token && (
@@ -178,25 +189,20 @@ const Navbar = () => {
                                     ref={dropdownRef}
                                     className="notifications-dropdown"
                                 >
-                                    <h4 className="text-sm mb-4" style={{ fontWeight: 600, borderBottom: '1px solid var(--border-color)', paddingBottom: '8px', textAlign: 'left' }}>
-                                        Friend Requests
-                                    </h4>
+                                    <div className="dropdown-header">
+                                        {t('navbar.friendRequests')}
+                                    </div>
                                     {notifications.length === 0 ? (
-                                        <p className="text-secondary text-sm" style={{ textAlign: 'center', padding: '12px 0' }}>
-                                            No pending friend requests
-                                        </p>
+                                        <div className="dropdown-empty">
+                                            {t('navbar.noRequests')}
+                                        </div>
                                     ) : (
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
                                             {notifications.map(notif => (
                                                 <div
                                                     key={notif.id}
-                                                    className="flex-between"
-                                                    style={{
-                                                        padding: '10px',
-                                                        backgroundColor: 'var(--bg-tertiary)',
-                                                        borderRadius: 'var(--radius-sm)',
-                                                        gap: '8px'
-                                                    }}
+                                                    className="dropdown-item"
+                                                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}
                                                 >
                                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1, textAlign: 'left' }}>
                                                         <Link
@@ -207,7 +213,7 @@ const Navbar = () => {
                                                             {notif.sender_username}
                                                         </Link>
                                                         <span className="text-secondary" style={{ fontSize: '0.75rem' }}>
-                                                            sent you a friend request
+                                                            {t('navbar.sentRequest')}
                                                         </span>
                                                     </div>
                                                     <div className="flex-center gap-2">
@@ -273,13 +279,13 @@ const Navbar = () => {
                         >
                             <X size={20} />
                         </button>
-                        <h3 className="text-lg mb-2" style={{ fontWeight: 600, textAlign: 'left' }}>User Lookup</h3>
-                        <p className="text-sm text-secondary mb-4" style={{ textAlign: 'left' }}>Search for an Orbit user by username.</p>
+                        <h3 className="text-lg mb-2" style={{ fontWeight: 600, textAlign: 'left' }}>{t('navbar.lookup')}</h3>
+                        <p className="text-sm text-secondary mb-4" style={{ textAlign: 'left' }}>{language === 'en' ? 'Search for an Orbit user by username.' : 'Busca un usuario de Orbit por su nombre.'}</p>
                         
                         <form onSubmit={handleLookupSubmit}>
                             <input 
                                 className="input mb-4"
-                                placeholder="Username"
+                                placeholder={t('navbar.searchPlaceholder')}
                                 value={lookupUsername}
                                 onChange={(e) => setLookupUsername(e.target.value)}
                                 required
@@ -353,14 +359,14 @@ const Navbar = () => {
                                     onClick={() => { setShowLookup(false); setLookupUsername(''); setLookupError(''); setSearchResults([]); setSearchPerformed(false); }}
                                     disabled={lookupLoading}
                                 >
-                                    Cancel
+                                    {language === 'en' ? 'Cancel' : 'Cancelar'}
                                 </button>
                                 <button 
                                     type="submit" 
                                     className="btn btn-primary"
                                     disabled={lookupLoading}
                                 >
-                                    {lookupLoading ? 'Searching...' : 'Search'}
+                                    {lookupLoading ? (language === 'en' ? 'Searching...' : 'Buscando...') : (language === 'en' ? 'Search' : 'Buscar')}
                                 </button>
                             </div>
                         </form>

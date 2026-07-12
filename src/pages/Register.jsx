@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { UserPlus } from 'lucide-react';
 import { API_BASE_URL } from '../config';
+import { useLanguage } from '../context/LanguageContext';
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -12,6 +13,7 @@ const Register = () => {
     });
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    const { language, toggleLanguage, t } = useLanguage();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -38,16 +40,26 @@ const Register = () => {
     };
 
     return (
-        <div className="flex-center" style={{ minHeight: '100vh', flexDirection: 'column' }}>
+        <div className="flex-center" style={{ minHeight: '100vh', flexDirection: 'column', position: 'relative' }}>
+            <div style={{ position: 'absolute', top: '24px', right: '24px' }}>
+                <button 
+                    onClick={toggleLanguage} 
+                    className="btn btn-ghost" 
+                    style={{ fontSize: '0.85rem', fontWeight: 'bold', minWidth: '40px', padding: '8px' }}
+                    title={language === 'en' ? "Switch to Spanish" : "Cambiar a Inglés"}
+                >
+                    {language.toUpperCase()}
+                </button>
+            </div>
             <div className="card" style={{ width: '100%', maxWidth: '400px' }}>
                 <div className="flex-center mb-4">
                     <UserPlus size={40} color="var(--accent-secondary)" />
                 </div>
-                <h2 className="text-xl flex-center mb-4">Create Account</h2>
+                <h2 className="text-xl flex-center mb-4">{t('auth.registerTitle')}</h2>
                 {error && <div style={{ color: 'var(--error)', marginBottom: '1rem', textAlign: 'center' }}>{error}</div>}
                 <form onSubmit={handleSubmit}>
                     <div className="mb-4">
-                        <label className="text-sm text-secondary">Username</label>
+                        <label className="text-sm text-secondary">{t('auth.username')}</label>
                         <input
                             type="text"
                             className="input mt-2"
@@ -57,7 +69,7 @@ const Register = () => {
                         />
                     </div>
                     <div className="mb-4">
-                        <label className="text-sm text-secondary">Email</label>
+                        <label className="text-sm text-secondary">{t('auth.email')}</label>
                         <input
                             type="email"
                             className="input mt-2"
@@ -67,7 +79,7 @@ const Register = () => {
                         />
                     </div>
                     <div className="mb-4">
-                        <label className="text-sm text-secondary">Password</label>
+                        <label className="text-sm text-secondary">{t('auth.password')}</label>
                         <input
                             type="password"
                             className="input mt-2"
@@ -77,7 +89,7 @@ const Register = () => {
                         />
                     </div>
                     <div className="mb-4">
-                        <label className="text-sm text-secondary">Bio (Optional)</label>
+                        <label className="text-sm text-secondary">{t('auth.bio')}</label>
                         <textarea
                             className="input mt-2"
                             value={formData.bio}
@@ -85,12 +97,12 @@ const Register = () => {
                         />
                     </div>
                     <button type="submit" className="btn btn-primary" style={{ width: '100%', backgroundColor: 'var(--accent-secondary)' }}>
-                        Sign Up
+                        {t('auth.registerBtn')}
                     </button>
                 </form>
                 <div className="mt-4 flex-center text-sm">
-                    <span className="text-secondary">Already have an account?</span>
-                    <Link to="/login" style={{ marginLeft: '5px', color: 'var(--accent-primary)' }}>Sign in</Link>
+                    <span className="text-secondary">{t('auth.haveAccount').split('?')[0]}?</span>
+                    <Link to="/login" style={{ marginLeft: '5px', color: 'var(--accent-primary)' }}>{t('auth.haveAccount').split('?')[1].trim()}</Link>
                 </div>
             </div>
         </div>

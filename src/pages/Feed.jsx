@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { MessageSquare, Heart, Share2, User as UserIcon, Camera, X } from 'lucide-react';
 import { API_BASE_URL } from '../config';
+import { useLanguage } from '../context/LanguageContext';
 
 const Feed = () => {
     const [posts, setPosts] = useState([]);
@@ -12,6 +13,7 @@ const Feed = () => {
     const [uploading, setUploading] = useState(false);
     const [createError, setCreateError] = useState('');
     const { token, user } = useAuth();
+    const { language, t } = useLanguage();
 
     const handleFileChange = (e) => {
         setCreateError('');
@@ -148,14 +150,14 @@ const Feed = () => {
                 <form onSubmit={handleCreatePost}>
                     <input
                         className="input mb-4"
-                        placeholder="Title"
+                        placeholder={t('feed.postTitle')}
                         value={newPost.title}
                         onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
                         required
                     />
                     <textarea
                         className="input mb-4"
-                        placeholder="What's on your mind?"
+                        placeholder={t('feed.postPlaceholder')}
                         rows={3}
                         value={newPost.content}
                         onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
@@ -198,7 +200,7 @@ const Feed = () => {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <label htmlFor="post-file-upload" className="btn btn-ghost flex-center gap-2" style={{ cursor: 'pointer', padding: '8px 12px' }}>
                             <Camera size={18} />
-                            <span style={{ fontSize: '0.875rem' }}>Add Image</span>
+                            <span style={{ fontSize: '0.875rem' }}>{t('feed.uploadImage')}</span>
                         </label>
                         <input
                             id="post-file-upload"
@@ -208,89 +210,99 @@ const Feed = () => {
                             style={{ display: 'none' }}
                         />
                         <button className="btn btn-primary" type="submit" disabled={uploading}>
-                            {uploading ? 'Posting...' : 'Post'}
+                            {uploading ? t('feed.publishing') : t('feed.postBtn')}
                         </button>
                     </div>
                 </form>
             </div>
 
             {/* Posts List */}
-            <div className="flex-center" style={{ flexDirection: 'column', gap: '1rem' }}>
-                {posts.map(post => (
-                    <div key={post.id} className="card" style={{ width: '100%' }}>
-                        <div className="flex-between mb-4">
-                            <div className="flex-center gap-2">
-                                <div style={{
-                                    width: 32,
-                                    height: 32,
-                                    borderRadius: '50%',
-                                    background: 'var(--bg-tertiary)',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    overflow: 'hidden',
-                                    border: '1px solid var(--border-color)'
-                                }}>
-                                    {post.owner?.avatar_url ? (
-                                        <img src={post.owner.avatar_url} alt={`${post.owner.username}'s avatar`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                    ) : (
-                                        <UserIcon size={16} color="var(--text-secondary)" />
-                                    )}
-                                </div>
-                                <div>
-                                    <Link to={`/users/${post.owner?.username}`} className="text-sm" style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
-                                        {post.owner?.username || `User ${post.owner_id}`}
-                                    </Link>
-                                    <div className="text-secondary" style={{ fontSize: '0.75rem' }}>
-                                        {new Date(post.created_at).toLocaleDateString()}
-                                        {post.updated_at && ' (edited)'}
+            <div className="flex-center" style={{ flexDirection: 'column', gap: '1rem', width: '100%' }}>
+                {posts.length === 0 ? (
+                    <div className="card text-center text-secondary" style={{ padding: '2rem', width: '100%' }}>
+                        {t('feed.noPosts')}
+                    </div>
+                ) : (
+                    posts.map(post => (
+                        <div key={post.id} className="card" style={{ width: '100%' }}>
+                            <div className="flex-between mb-4">
+                                <div className="flex-center gap-2">
+                                    <div style={{
+                                        width: 32,
+                                        height: 32,
+                                        borderRadius: '50%',
+                                        background: 'var(--bg-tertiary)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        overflow: 'hidden',
+                                        border: '1px solid var(--border-color)'
+                                    }}>
+                                        {post.owner?.avatar_url ? (
+                                            <img src={post.owner.avatar_url} alt={`${post.owner.username}'s avatar`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        ) : (
+                                            <UserIcon size={16} color="var(--text-secondary)" />
+                                        )}
+                                    </div>
+                                    <div>
+                                        <Link to={`/users/${post.owner?.username}`} className="text-sm" style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+                                            {post.owner?.username || `User ${post.owner_id}`}
+                                        </Link>
+                                        <div className="text-secondary" style={{ fontSize: '0.75rem' }}>
+                                            {new Date(post.created_at).toLocaleDateString()}
+                                            {post.updated_at && ` (${t('postDetail.edited')})`}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <h3 className="text-lg mb-4">{post.title}</h3>
-                        <p className="text-secondary mb-4">{post.content}</p>
+                            <h3 className="text-lg mb-4">{post.title}</h3>
+                            <p className="text-secondary mb-4">{post.content}</p>
 
-                        {post.media_urls && post.media_urls.length > 0 && (
-                            <div style={{ 
-                                marginBottom: '16px', 
-                                borderRadius: '8px', 
-                                overflow: 'hidden', 
-                                border: '1px solid var(--border-color)',
-                                backgroundColor: 'var(--bg-tertiary)',
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center'
-                            }}>
-                                <img 
-                                    src={post.media_urls[0]} 
-                                    alt="Post attachment" 
-                                    style={{ maxWidth: '100%', maxHeight: '500px', objectFit: 'contain', display: 'block' }} 
-                                />
+                            {post.media_urls && post.media_urls.length > 0 && (
+                                <div style={{ 
+                                    marginBottom: '16px', 
+                                    borderRadius: '8px', 
+                                    overflow: 'hidden', 
+                                    border: '1px solid var(--border-color)',
+                                    backgroundColor: 'var(--bg-tertiary)',
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center'
+                                }}>
+                                    <img 
+                                        src={post.media_urls[0]} 
+                                        alt="Post attachment" 
+                                        style={{ maxWidth: '100%', maxHeight: '500px', objectFit: 'contain', display: 'block' }} 
+                                    />
+                                </div>
+                            )}
+
+                            <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem', marginTop: '1rem' }} className="flex-between">
+                                <div className="flex-center gap-4">
+                                    <button
+                                        className="btn btn-ghost flex-center gap-2"
+                                        onClick={() => handleVote(post.id)}
+                                        style={{ color: post.user_voted ? '#ef4444' : 'inherit' }}
+                                    >
+                                        <Heart size={18} fill={post.user_voted ? '#ef4444' : 'none'} color={post.user_voted ? '#ef4444' : 'currentColor'} />
+                                        <span className="text-sm">
+                                            {post.vote_count !== undefined 
+                                                ? `${post.vote_count} ${post.vote_count === 1 
+                                                    ? (language === 'en' ? 'Like' : 'Me gusta') 
+                                                    : (language === 'en' ? 'Likes' : 'Me gusta')}` 
+                                                : (language === 'en' ? 'Like' : 'Me gusta')}
+                                        </span>
+                                    </button>
+                                    <Link to={`/posts/${post.id}`} className="btn btn-ghost flex-center gap-2">
+                                        <MessageSquare size={18} />
+                                        <span className="text-sm">{language === 'en' ? 'Comment' : 'Comentar'}</span>
+                                    </Link>
+                                </div>
                             </div>
-                        )}
-
-                        <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem', marginTop: '1rem' }} className="flex-between">
-                            <div className="flex-center gap-4">
-                                <button
-                                    className="btn btn-ghost flex-center gap-2"
-                                    onClick={() => handleVote(post.id)}
-                                    style={{ color: post.user_voted ? '#ef4444' : 'inherit' }}
-                                >
-                                    <Heart size={18} fill={post.user_voted ? '#ef4444' : 'none'} color={post.user_voted ? '#ef4444' : 'currentColor'} />
-                                    <span className="text-sm">
-                                        {post.vote_count !== undefined ? `${post.vote_count} Like${post.vote_count !== 1 ? 's' : ''}` : 'Like'}
-                                    </span>
-                                </button>
-                                <Link to={`/posts/${post.id}`} className="btn btn-ghost flex-center gap-2">
-                                    <MessageSquare size={18} />
-                                    <span className="text-sm">Comment</span>
-                                </Link>
-                            </div>
                         </div>
-                    </div>
-                ))}
+                    ))
+                )}
             </div>
         </div>
     );

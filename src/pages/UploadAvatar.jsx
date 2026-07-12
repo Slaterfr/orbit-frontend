@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Upload, X, ArrowLeft, Camera } from 'lucide-react';
 import { API_BASE_URL } from '../config';
+import { useLanguage } from '../context/LanguageContext';
 
 const UploadAvatar = () => {
     const { token, user, refreshUser } = useAuth();
     const navigate = useNavigate();
+    const { language, t } = useLanguage();
     const [selectedFile, setSelectedFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState(user?.avatar_url || '');
     const [loading, setLoading] = useState(false);
@@ -21,14 +23,14 @@ const UploadAvatar = () => {
 
         // Check if file is an image
         if (!file.type.startsWith('image/')) {
-            setError('Please select a valid image file.');
+            setError(language === 'en' ? 'Please select a valid image file.' : 'Por favor selecciona un archivo de imagen válido.');
             return;
         }
-
+ 
         // Limit size to 5MB
         const MAX_SIZE = 5 * 1024 * 1024;
         if (file.size > MAX_SIZE) {
-            setError('File size exceeds the 5MB limit. Please choose a smaller image.');
+            setError(language === 'en' ? 'File size exceeds the 5MB limit. Please choose a smaller image.' : 'El tamaño supera el límite de 5MB. Por favor elige una imagen más pequeña.');
             return;
         }
 
@@ -39,7 +41,7 @@ const UploadAvatar = () => {
     const handleUpload = async (e) => {
         e.preventDefault();
         if (!selectedFile) {
-            setError('Please select an image first.');
+            setError(language === 'en' ? 'Please select an image first.' : 'Por favor selecciona una imagen primero.');
             return;
         }
 
@@ -92,22 +94,22 @@ const UploadAvatar = () => {
                 style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingLeft: 0 }}
             >
                 <ArrowLeft size={16} />
-                Back
+                {t('avatar.back')}
             </button>
-
+ 
             <div className="card">
-                <h2 className="text-xl mb-2" style={{ fontWeight: 600 }}>Update Profile Picture</h2>
-                <p className="text-sm text-secondary mb-6">Upload a profile picture. JPG, PNG or WebP, up to 5MB. Files are validated and stored securely.</p>
-
+                <h2 className="text-xl mb-2" style={{ fontWeight: 600 }}>{t('avatar.title')}</h2>
+                <p className="text-sm text-secondary mb-6">{language === 'en' ? 'Upload a profile picture. JPG, PNG or WebP, up to 5MB. Files are validated and stored securely.' : 'Sube una foto de perfil. JPG, PNG o WebP, hasta 5MB. Los archivos son validados y guardados de forma segura.'}</p>
+ 
                 {error && (
                     <div style={{ color: 'var(--error)', backgroundColor: 'rgba(239, 68, 68, 0.1)', padding: '12px', borderRadius: '8px', marginBottom: '20px', fontSize: '0.875rem' }}>
                         {error}
                     </div>
                 )}
-
+ 
                 {success && (
                     <div style={{ color: 'var(--accent-primary)', backgroundColor: 'rgba(59, 130, 246, 0.1)', padding: '12px', borderRadius: '8px', marginBottom: '20px', fontSize: '0.875rem', textAlign: 'center' }}>
-                        Profile picture updated successfully! Redirecting...
+                        {language === 'en' ? 'Profile picture updated successfully! Redirecting...' : '¡Foto de perfil actualizada con éxito! Redirigiendo...'}
                     </div>
                 )}
 
@@ -179,7 +181,11 @@ const UploadAvatar = () => {
                             }}
                         >
                             <Upload size={18} />
-                            <span>{selectedFile ? 'Select a different image' : 'Choose an image file'}</span>
+                            <span>
+                                {selectedFile 
+                                    ? (language === 'en' ? 'Select a different image' : 'Seleccionar otra imagen') 
+                                    : (language === 'en' ? 'Choose an image file' : 'Elegir archivo de imagen')}
+                            </span>
                         </label>
                         <input 
                             id="file-upload" 
@@ -189,14 +195,14 @@ const UploadAvatar = () => {
                             style={{ display: 'none' }}
                         />
                     </div>
-
+ 
                     <button 
                         type="submit" 
                         className="btn btn-primary" 
                         disabled={loading || !selectedFile}
                         style={{ width: '100%' }}
                     >
-                        {loading ? 'Uploading...' : 'Save Profile Picture'}
+                        {loading ? t('avatar.uploading') : t('avatar.uploadBtn')}
                     </button>
                 </form>
             </div>
