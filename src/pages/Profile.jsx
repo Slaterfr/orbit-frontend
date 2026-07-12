@@ -15,7 +15,11 @@ const Profile = () => {
     const [editBioText, setEditBioText] = useState('');
     const { token, user, refreshUser } = useAuth();
 
-    const isCurrentUser = user && (user.username === username || username === 'me');
+    const isCurrentUser = user && (
+        username === 'me' || 
+        (profile && user.id === profile.id) || 
+        (user.username && username && user.username.toLowerCase() === username.toLowerCase())
+    );
 
     const fetchFriendsList = async (targetId) => {
         try {
