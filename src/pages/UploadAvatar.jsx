@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { Upload, X, ArrowLeft, Camera } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { useLanguage } from '../context/LanguageContext';
+import { parseApiError } from '../utils/errorParser';
 
 const UploadAvatar = () => {
     const { token, user, refreshUser } = useAuth();
@@ -63,7 +64,7 @@ const UploadAvatar = () => {
 
             if (!response.ok) {
                 const data = await response.json();
-                throw new Error(data.detail || 'Failed to upload profile picture');
+                throw new Error(parseApiError(data, 'Failed to upload profile picture'));
             }
 
             setSuccess(true);

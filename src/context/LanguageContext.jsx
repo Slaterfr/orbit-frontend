@@ -30,7 +30,18 @@ const translations = {
       needAccount: "New to Orbit? Sign Up",
       invalidCreds: "Invalid credentials",
       regFailed: "Registration failed",
-      passwordHint: "Password must be 8+ characters, contain one uppercase letter and one digit"
+      passwordHint: "Password must be 8+ characters, contain one uppercase letter and one digit",
+      forgotPassword: "Forgot Password?",
+      forgotPasswordTitle: "Recover Orbit Password",
+      forgotPasswordDesc: "Enter your email address and we will send you a secure link to reset your password.",
+      forgotPasswordBtn: "Send Recovery Link",
+      forgotPasswordSuccess: "If the email exists, a recovery link has been sent. Check your inbox!",
+      resetPasswordTitle: "Reset Password",
+      newPassword: "New Password",
+      confirmPassword: "Confirm New Password",
+      resetPasswordBtn: "Save New Password",
+      resetPasswordSuccess: "Your password has been changed successfully! Redirecting to login...",
+      passwordsMismatch: "Passwords do not match."
     },
     feed: {
       createPost: "Create a Post",
@@ -121,7 +132,18 @@ const translations = {
       needAccount: "¿Nuevo en Orbit? Regístrate",
       invalidCreds: "Credenciales inválidas",
       regFailed: "El registro falló",
-      passwordHint: "La contraseña debe tener más de 8 caracteres, una letra mayúscula y un dígito"
+      passwordHint: "La contraseña debe tener más de 8 caracteres, una letra mayúscula y un dígito",
+      forgotPassword: "¿Olvidaste tu contraseña?",
+      forgotPasswordTitle: "Recuperar Contraseña de Orbit",
+      forgotPasswordDesc: "Ingresa tu correo electrónico y te enviaremos un enlace seguro para restablecer tu contraseña.",
+      forgotPasswordBtn: "Enviar Enlace de Recuperación",
+      forgotPasswordSuccess: "Si el correo existe, se ha enviado un enlace de recuperación. ¡Revisa tu correo!",
+      resetPasswordTitle: "Restablecer Contraseña",
+      newPassword: "Nueva Contraseña",
+      confirmPassword: "Confirmar Nueva Contraseña",
+      resetPasswordBtn: "Guardar Nueva Contraseña",
+      resetPasswordSuccess: "¡Tu contraseña ha sido cambiada con éxito! Redirigiendo...",
+      passwordsMismatch: "Las contraseñas no coinciden."
     },
     feed: {
       createPost: "Crear una Publicación",

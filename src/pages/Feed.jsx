@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { MessageSquare, Heart, Share2, User as UserIcon, Camera, X } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { useLanguage } from '../context/LanguageContext';
+import { parseApiError } from '../utils/errorParser';
 
 const Feed = () => {
     const [posts, setPosts] = useState([]);
@@ -92,7 +93,7 @@ const Feed = () => {
 
                 if (!uploadRes.ok) {
                     const errData = await uploadRes.json();
-                    throw new Error(errData.detail || 'Image upload failed');
+                    throw new Error(parseApiError(errData, 'Image upload failed'));
                 }
 
                 const uploadData = await uploadRes.json();
@@ -110,7 +111,7 @@ const Feed = () => {
 
             if (!response.ok) {
                 const errData = await response.json();
-                throw new Error(errData.detail || 'Failed to create post');
+                throw new Error(parseApiError(errData, 'Failed to create post'));
             }
 
             setNewPost({ title: '', content: '' });

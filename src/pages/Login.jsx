@@ -86,6 +86,11 @@ const Login = () => {
                             onChange={(e) => setPassword(e.target.value)}
                             required
                         />
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '6px' }}>
+                            <Link to="/forgot-password" style={{ fontSize: '0.8rem', color: 'var(--accent-primary)', textDecoration: 'none' }}>
+                                {t('auth.forgotPassword')}
+                            </Link>
+                        </div>
                     </div>
                     <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
                         {t('auth.loginBtn')}

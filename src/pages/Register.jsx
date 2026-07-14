@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { UserPlus } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { useLanguage } from '../context/LanguageContext';
+import { parseApiError } from '../utils/errorParser';
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -30,7 +31,7 @@ const Register = () => {
 
             if (!response.ok) {
                 const data = await response.json();
-                throw new Error(data.detail || 'Registration failed');
+                throw new Error(parseApiError(data, 'Registration failed'));
             }
 
             navigate('/login');
