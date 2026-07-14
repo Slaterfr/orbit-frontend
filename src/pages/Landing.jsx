@@ -80,18 +80,7 @@ const Landing = () => {
                 backgroundColor: 'rgba(15, 23, 42, 0.8)'
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={{
-                        width: '28px',
-                        height: '28px',
-                        borderRadius: '50%',
-                        background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        boxShadow: '0 0 12px rgba(59, 130, 246, 0.5)'
-                    }}>
-                        <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#fff' }}>O</span>
-                    </div>
+                    <img src="/logo.png" alt="Orbit Logo" style={{ width: 30, height: 30, borderRadius: '50%', objectFit: 'cover' }} />
                     <span style={{ fontSize: '1.25rem', fontWeight: 700, letterSpacing: '0.5px' }}>Orbit</span>
                 </div>
 
@@ -371,7 +360,7 @@ const Landing = () => {
                             flexShrink: 0
                         }}>
                             <img
-                                src="/creator_pfp.png"
+                                src="/ceo_pfp.png"
                                 alt="Slater - Developer Avatar"
                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                             />
