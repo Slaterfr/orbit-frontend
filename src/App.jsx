@@ -10,6 +10,7 @@ import PrivateRoute from './components/PrivateRoute';
 import Navbar from './components/Navbar';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import Landing from './pages/Landing';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/landing" element={<Landing />} />
             
             <Route element={<PrivateRoute />}>
               <Route path="/" element={

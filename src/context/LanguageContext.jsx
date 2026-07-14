@@ -105,6 +105,22 @@ const translations = {
       uploadBtn: "Upload Picture",
       success: "Profile picture updated successfully!",
       back: "Back to Profile"
+    },
+    landing: {
+      heroTitle: "Your Universe, Connected",
+      heroSubtitle: "Welcome to Orbit — a clean, fast, and modern space to connect, share photos, and discover stories.",
+      exploreBtn: "Explore Orbit",
+      meetCreatorBtn: "Meet the Creator",
+      featuresTitle: "Why Orbit?",
+      featFastApiTitle: "FastAPI Engine",
+      featFastApiDesc: "High-performance Python backend managing stateless JWT sessions and database-backed security.",
+      featReactTitle: "React SPA UI",
+      featReactDesc: "Vibrant, single-page client interface offering smooth transitions and instantaneous notifications.",
+      featPillowTitle: "Media Optimization",
+      featPillowDesc: "Automated EXIF orientation transposition and WebP compression for lightning-fast feeds.",
+      creatorTitle: "Behind the Orbit",
+      creatorBio: "Hey! I'm Slater, Software Dev and Computer Engineering student, and creator of Orbit, of course. I designed this application as a personal vlog for friends and acquaintances, as a space where they can interact and share whatever they want! In case of bugs, questions, or suggestions please contact me on my insta or email. Enjoy Orbit!",
+      creatorSocials: "Connect with Me"
     }
   },
   es: {
@@ -207,6 +223,22 @@ const translations = {
       uploadBtn: "Subir Imagen",
       success: "¡Foto de perfil actualizada con éxito!",
       back: "Volver al Perfil"
+    },
+    landing: {
+      heroTitle: "Tu Universo, Conectado",
+      heroSubtitle: "Bienvenido a Orbit: un espacio limpio, rápido y moderno para conectarte, compartir fotos y descubrir historias.",
+      exploreBtn: "Explorar Orbit",
+      meetCreatorBtn: "Conocer al Creador",
+      featuresTitle: "¿Por qué Orbit?",
+      featFastApiTitle: "Motor FastAPI",
+      featFastApiDesc: "Backend en Python de alto rendimiento que gestiona sesiones JWT sin estado y seguridad integrada.",
+      featReactTitle: "Interfaz React SPA",
+      featReactDesc: "Cliente web fluido que ofrece transiciones rápidas y notificaciones instantáneas.",
+      featPillowTitle: "Optimización de Medios",
+      featPillowDesc: "Transposición automática de orientación EXIF y compresión WebP para cargas ultrarrápidas.",
+      creatorTitle: "Detrás de Orbit",
+      creatorBio: "¡Hey! soy Slater, Software Dev y estudiante de Ingeniería Informática, y creador de Orbit, por supuesto. Diseñé esta aplicación a manera de vlog personal para amigos y conocidos, como un espacio donde puedan interactuar y compartir lo que quieran! En caso de bugs, preguntas, o sugerencias por favor contáctame a mi insta o mail. ¡Disfruta de Orbit!",
+      creatorSocials: "Conéctate Conmigo"
     }
   }
 };
