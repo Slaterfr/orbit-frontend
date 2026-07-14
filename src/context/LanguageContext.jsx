@@ -108,18 +108,18 @@ const translations = {
     },
     landing: {
       heroTitle: "Your Universe, Connected",
-      heroSubtitle: "Welcome to Orbit — a clean, fast, and modern space to connect, share photos, and discover stories.",
-      exploreBtn: "Explore Orbit",
+      heroSubtitle: "A private, clean, and modern space to connect with your friends, share your favorite moments, and stay in orbit with what matters most.",
+      exploreBtn: "Get Started",
       meetCreatorBtn: "Meet the Creator",
       featuresTitle: "Why Orbit?",
-      featFastApiTitle: "FastAPI Engine",
-      featFastApiDesc: "High-performance Python backend managing stateless JWT sessions and database-backed security.",
-      featReactTitle: "React SPA UI",
-      featReactDesc: "Vibrant, single-page client interface offering smooth transitions and instantaneous notifications.",
-      featPillowTitle: "Media Optimization",
-      featPillowDesc: "Automated EXIF orientation transposition and WebP compression for lightning-fast feeds.",
+      featShareTitle: "Share Your Moments",
+      featShareDesc: "Share photos, thoughts, and experiences with your friends.",
+      featCircleTitle: "Build Your Circle",
+      featCircleDesc: "Connect only with people you choose through friend requests.",
+      featExperienceTitle: "Clean & Modern Experience",
+      featExperienceDesc: "Enjoy a fast, distraction-free social experience focused on meaningful interactions.",
       creatorTitle: "Behind the Orbit",
-      creatorBio: "Hey! I'm Slater, Software Dev and Computer Engineering student, and creator of Orbit, of course. I designed this application as a personal vlog for friends and acquaintances, as a space where they can interact and share whatever they want! In case of bugs, questions, or suggestions please contact me on my insta or email. Enjoy Orbit!",
+      creatorBio: "Hey! I'm Slater, Software Developer and Computer Engineering student, as well as the creator of Orbit. I built this application as a personal space for friends and acquaintances to share moments, interact, and simply have a good time. Orbit is still in development, so if you find any bugs, have an idea, or want to give feedback, feel free to write to me on Instagram or via email. Thanks for being here and enjoy Orbit!",
       creatorSocials: "Connect with Me"
     }
   },
@@ -226,50 +226,50 @@ const translations = {
     },
     landing: {
       heroTitle: "Tu Universo, Conectado",
-      heroSubtitle: "Bienvenido a Orbit: un espacio limpio, rápido y moderno para conectarte, compartir fotos y descubrir historias.",
-      exploreBtn: "Explorar Orbit",
+      heroSubtitle: "Un espacio privado, limpio y moderno para conectarte con tus amigos, compartir tus momentos favoritos y estar en órbita con lo que más te importa.",
+      exploreBtn: "Comenzar",
       meetCreatorBtn: "Conocer al Creador",
       featuresTitle: "¿Por qué Orbit?",
-      featFastApiTitle: "Motor FastAPI",
-      featFastApiDesc: "Backend en Python de alto rendimiento que gestiona sesiones JWT sin estado y seguridad integrada.",
-      featReactTitle: "Interfaz React SPA",
-      featReactDesc: "Cliente web fluido que ofrece transiciones rápidas y notificaciones instantáneas.",
-      featPillowTitle: "Optimización de Medios",
-      featPillowDesc: "Transposición automática de orientación EXIF y compresión WebP para cargas ultrarrápidas.",
+      featShareTitle: "Comparte tus Momentos",
+      featShareDesc: "Comparte fotos, pensamientos y experiencias con tus amigos.",
+      featCircleTitle: "Crea tu Círculo",
+      featCircleDesc: "Conéctate solo con las personas que elijas a través de solicitudes de amistad.",
+      featExperienceTitle: "Experiencia Limpia y Moderna",
+      featExperienceDesc: "Disfruta de una experiencia social rápida y sin distracciones, centrada en interacciones significativas.",
       creatorTitle: "Detrás de Orbit",
-      creatorBio: "¡Hey! soy Slater, Software Dev y estudiante de Ingeniería Informática, y creador de Orbit, por supuesto. Diseñé esta aplicación a manera de vlog personal para amigos y conocidos, como un espacio donde puedan interactuar y compartir lo que quieran! En caso de bugs, preguntas, o sugerencias por favor contáctame a mi insta o mail. ¡Disfruta de Orbit!",
+      creatorBio: "Hey! soy Slater, Software Developer y estudiante de Ingeniería Informática, además del creador de Orbit. Construí esta aplicación como un espacio personal para amigos y conocidos, donde puedan compartir momentos, interactuar y simplemente pasar un buen rato. Orbit sigue en desarrollo, así que si encuentras algún bug, tienes una idea o quieres dar feedback, no dudes en escribirme por Instagram o por correo. Gracias por estar aquí y disfruta de Orbit!",
       creatorSocials: "Conéctate Conmigo"
     }
   }
 };
 
 export const LanguageProvider = ({ children }) => {
-    const [language, setLanguage] = useState(localStorage.getItem('language') || 'en');
+  const [language, setLanguage] = useState(localStorage.getItem('language') || 'en');
 
-    useEffect(() => {
-        localStorage.setItem('language', language);
-    }, [language]);
+  useEffect(() => {
+    localStorage.setItem('language', language);
+  }, [language]);
 
-    const toggleLanguage = () => {
-        setLanguage((prev) => (prev === 'en' ? 'es' : 'en'));
-    };
+  const toggleLanguage = () => {
+    setLanguage((prev) => (prev === 'en' ? 'es' : 'en'));
+  };
 
-    const t = (key) => {
-        const keys = key.split('.');
-        let value = translations[language];
-        for (const k of keys) {
-            if (value && value[k] !== undefined) {
-                value = value[k];
-            } else {
-                return key;
-            }
-        }
-        return value;
-    };
+  const t = (key) => {
+    const keys = key.split('.');
+    let value = translations[language];
+    for (const k of keys) {
+      if (value && value[k] !== undefined) {
+        value = value[k];
+      } else {
+        return key;
+      }
+    }
+    return value;
+  };
 
-    return (
-        <LanguageContext.Provider value={{ language, toggleLanguage, t }}>
-            {children}
-        </LanguageContext.Provider>
-    );
+  return (
+    <LanguageContext.Provider value={{ language, toggleLanguage, t }}>
+      {children}
+    </LanguageContext.Provider>
+  );
 };

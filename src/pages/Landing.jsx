@@ -1,19 +1,28 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Github,
     Linkedin,
     Instagram,
     ArrowRight,
-    Terminal,
+    Users,
     Layout,
     Image as ImageIcon,
     Mail
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 
 const Landing = () => {
     const navigate = useNavigate();
     const { language, toggleLanguage, t } = useLanguage();
+    const { token } = useAuth();
+
+    useEffect(() => {
+        if (token) {
+            navigate('/');
+        }
+    }, [token, navigate]);
 
     const handleCreatorScroll = () => {
         const element = document.getElementById('creator-section');
@@ -140,7 +149,7 @@ const Landing = () => {
                             display: 'inline-block',
                             animation: 'pulse 2s infinite'
                         }} />
-                        v1.0 {language === 'en' ? 'Live Mockup' : 'Prueba en vivo'}
+                        v1.1.3
                     </div>
 
                     <h1 style={{
@@ -242,13 +251,13 @@ const Landing = () => {
                                 justifyContent: 'center',
                                 color: '#3b82f6'
                             }}>
-                                <Terminal size={24} />
+                                <ImageIcon size={24} />
                             </div>
                             <h3 style={{ fontSize: '1.2rem', fontWeight: 600, color: '#fff' }}>
-                                {t('landing.featFastApiTitle')}
+                                {t('landing.featShareTitle')}
                             </h3>
                             <p style={{ fontSize: '0.9rem', lineHeight: 1.5, color: '#94a3b8' }}>
-                                {t('landing.featFastApiDesc')}
+                                {t('landing.featShareDesc')}
                             </p>
                         </div>
 
@@ -273,13 +282,13 @@ const Landing = () => {
                                 justifyContent: 'center',
                                 color: '#8b5cf6'
                             }}>
-                                <Layout size={24} />
+                                <Users size={24} />
                             </div>
                             <h3 style={{ fontSize: '1.2rem', fontWeight: 600, color: '#fff' }}>
-                                {t('landing.featReactTitle')}
+                                {t('landing.featCircleTitle')}
                             </h3>
                             <p style={{ fontSize: '0.9rem', lineHeight: 1.5, color: '#94a3b8' }}>
-                                {t('landing.featReactDesc')}
+                                {t('landing.featCircleDesc')}
                             </p>
                         </div>
 
@@ -304,13 +313,13 @@ const Landing = () => {
                                 justifyContent: 'center',
                                 color: '#10b981'
                             }}>
-                                <ImageIcon size={24} />
+                                <Layout size={24} />
                             </div>
                             <h3 style={{ fontSize: '1.2rem', fontWeight: 600, color: '#fff' }}>
-                                {t('landing.featPillowTitle')}
+                                {t('landing.featExperienceTitle')}
                             </h3>
                             <p style={{ fontSize: '0.9rem', lineHeight: 1.5, color: '#94a3b8' }}>
-                                {t('landing.featPillowDesc')}
+                                {t('landing.featExperienceDesc')}
                             </p>
                         </div>
                     </div>
@@ -362,7 +371,7 @@ const Landing = () => {
                             flexShrink: 0
                         }}>
                             <img
-                                src="/creator_avatar.png"
+                                src="/creator_pfp.png"
                                 alt="Slater - Developer Avatar"
                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                             />

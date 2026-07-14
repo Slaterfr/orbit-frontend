@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { UserPlus } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { useLanguage } from '../context/LanguageContext';
 import { parseApiError } from '../utils/errorParser';
+import { useAuth } from '../context/AuthContext';
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -13,8 +14,15 @@ const Register = () => {
         bio: ''
     });
     const [error, setError] = useState('');
+    const { token } = useAuth();
     const navigate = useNavigate();
     const { language, toggleLanguage, t } = useLanguage();
+ 
+    useEffect(() => {
+        if (token) {
+            navigate('/');
+        }
+    }, [token, navigate]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
