@@ -5,6 +5,7 @@ import { LogIn } from 'lucide-react';
 import { parseJwt } from '../utils';
 import { API_BASE_URL } from '../config';
 import { useLanguage } from '../context/LanguageContext';
+import { parseApiError } from '../utils/errorParser';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -29,7 +30,8 @@ const Login = () => {
             });
 
             if (!response.ok) {
-                throw new Error('Login failed');
+                const data = await response.json().catch(() => null);
+                throw new Error(parseApiError(data, 'Login failed'));
             }
 
             const data = await response.json();
@@ -43,7 +45,11 @@ const Login = () => {
             login(userData, data.access_token, data.refresh_token);
             navigate('/');
         } catch (err) {
-            setError(t('auth.invalidCreds'));
+            if (err.message && err.message !== 'Login failed' && err.message !== '[object Object]') {
+                setError(err.message);
+            } else {
+                setError(t('auth.invalidCreds'));
+            }
             console.error(err);
         }
     };

@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { User as UserIcon, UserPlus, UserMinus, UserCheck, UserX, Heart, MessageSquare, Edit2 } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { useLanguage } from '../context/LanguageContext';
+import { parseApiError } from '../utils/errorParser';
 
 const Profile = () => {
     const { username } = useParams();
@@ -14,6 +15,7 @@ const Profile = () => {
     const [notFound, setNotFound] = useState(false);
     const [isEditingBio, setIsEditingBio] = useState(false);
     const [editBioText, setEditBioText] = useState('');
+    const [bioError, setBioError] = useState('');
     const { token, user, refreshUser } = useAuth();
     const { language, t } = useLanguage();
 
@@ -230,6 +232,7 @@ const Profile = () => {
     }, [profile]);
 
     const handleSaveBio = async () => {
+        setBioError('');
         try {
             const response = await fetch(`${API_BASE_URL}/users/me`, {
                 method: 'PUT',
@@ -247,10 +250,12 @@ const Profile = () => {
                     refreshUser();
                 }
             } else {
-                console.error("Failed to save bio");
+                const data = await response.json();
+                setBioError(parseApiError(data, 'Failed to save bio'));
             }
         } catch (e) {
             console.error("Error saving bio", e);
+            setBioError(e.message || 'Error saving bio');
         }
     };
 
@@ -358,6 +363,11 @@ const Profile = () => {
                             maxLength={500}
                             style={{ width: '100%', minHeight: '80px', resize: 'vertical' }}
                         />
+                        {bioError && (
+                            <div style={{ color: 'var(--error)', fontSize: '0.8rem', textAlign: 'left' }}>
+                                {bioError}
+                            </div>
+                        )}
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
                             <button 
                                 className="btn btn-ghost text-sm" 

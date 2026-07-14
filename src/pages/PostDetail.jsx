@@ -4,16 +4,23 @@ import { useAuth } from '../context/AuthContext';
 import { MessageSquare, Heart, Edit2, Trash2, User as UserIcon } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { useLanguage } from '../context/LanguageContext';
+import { parseApiError } from '../utils/errorParser';
 
 const CommentItem = ({ comment, onReply, onVote, onEdit, onDelete, currentUser }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editContent, setEditContent] = useState(comment.content);
+    const [editError, setEditError] = useState('');
     const { language, t } = useLanguage();
  
-    const handleSave = () => {
+    const handleSave = async () => {
         if (editContent.trim()) {
-            onEdit(comment.id, editContent);
-            setIsEditing(false);
+            setEditError('');
+            const errorMsg = await onEdit(comment.id, editContent);
+            if (!errorMsg) {
+                setIsEditing(false);
+            } else {
+                setEditError(errorMsg);
+            }
         }
     };
  
@@ -59,9 +66,14 @@ const CommentItem = ({ comment, onReply, onVote, onEdit, onDelete, currentUser }
                         onChange={(e) => setEditContent(e.target.value)}
                         rows={2}
                     />
+                    {editError && (
+                        <div style={{ color: 'var(--error)', fontSize: '0.8rem', marginBottom: '8px', textAlign: 'left' }}>
+                            {editError}
+                        </div>
+                    )}
                     <div className="flex-start gap-2">
                         <button className="btn btn-primary text-xs" style={{ padding: '4px 8px' }} onClick={handleSave}>{t('postDetail.save')}</button>
-                        <button className="btn btn-ghost text-xs" style={{ padding: '4px 8px' }} onClick={() => { setIsEditing(false); setEditContent(comment.content); }}>{t('postDetail.cancel')}</button>
+                        <button className="btn btn-ghost text-xs" style={{ padding: '4px 8px' }} onClick={() => { setIsEditing(false); setEditContent(comment.content); setEditError(''); }}>{t('postDetail.cancel')}</button>
                     </div>
                 </div>
             ) : (
@@ -143,6 +155,8 @@ const PostDetail = () => {
     const [isEditingPost, setIsEditingPost] = useState(false);
     const [editPostTitle, setEditPostTitle] = useState('');
     const [editPostContent, setEditPostContent] = useState('');
+    const [postError, setPostError] = useState('');
+    const [commentError, setCommentError] = useState('');
 
     const fetchPost = async () => {
         try {
@@ -227,6 +241,7 @@ const PostDetail = () => {
 
     const handleSubmitComment = async (e) => {
         e.preventDefault();
+        setCommentError('');
         try {
             const payload = {
                 content: newComment,
@@ -245,9 +260,13 @@ const PostDetail = () => {
                 setNewComment('');
                 setReplyTo(null);
                 fetchComments();
+            } else {
+                const data = await response.json();
+                setCommentError(parseApiError(data, 'Failed to post comment'));
             }
         } catch (e) {
             console.error(e);
+            setCommentError(e.message || 'Failed to post comment');
         }
     };
 
@@ -271,6 +290,7 @@ const PostDetail = () => {
 
     const handleUpdatePost = async (e) => {
         e.preventDefault();
+        setPostError('');
         try {
             const response = await fetch(`${API_BASE_URL}/posts/${id}`, {
                 method: 'PUT',
@@ -283,9 +303,13 @@ const PostDetail = () => {
             if (response.ok) {
                 setIsEditingPost(false);
                 fetchPost();
+            } else {
+                const data = await response.json();
+                setPostError(parseApiError(data, 'Failed to update post'));
             }
         } catch (error) {
             console.error("Update post failed", error);
+            setPostError(error.message || 'Update post failed');
         }
     };
 
@@ -317,9 +341,14 @@ const PostDetail = () => {
             });
             if (response.ok) {
                 fetchComments();
+                return null;
+            } else {
+                const data = await response.json();
+                return parseApiError(data, 'Edit comment failed');
             }
         } catch (error) {
             console.error("Edit comment failed", error);
+            return error.message || 'Edit comment failed';
         }
     };
 
@@ -361,8 +390,13 @@ const PostDetail = () => {
                             onChange={(e) => setEditPostContent(e.target.value)}
                             required
                         />
+                        {postError && (
+                            <div style={{ color: 'var(--error)', fontSize: '0.8rem', marginBottom: '12px', textAlign: 'left' }}>
+                                {postError}
+                            </div>
+                        )}
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-                            <button className="btn btn-ghost" type="button" onClick={() => setIsEditingPost(false)}>{t('postDetail.cancel')}</button>
+                            <button className="btn btn-ghost" type="button" onClick={() => { setIsEditingPost(false); setPostError(''); }}>{t('postDetail.cancel')}</button>
                             <button className="btn btn-primary" type="submit">{t('postDetail.save')}</button>
                         </div>
                     </form>
@@ -489,6 +523,11 @@ const PostDetail = () => {
                         <button type="submit" className="btn btn-primary">{t('postDetail.commentBtn')}</button>
                     </div>
                 </form>
+                {commentError && (
+                    <div style={{ color: 'var(--error)', fontSize: '0.8rem', marginTop: '-8px', marginBottom: '16px', textAlign: 'left' }}>
+                        {commentError}
+                    </div>
+                )}
 
                 <div>
                     {comments.map(comment => (
