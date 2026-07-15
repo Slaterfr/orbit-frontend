@@ -143,7 +143,7 @@ const Profile = () => {
 
     const handleCancelRequest = async () => {
         try {
-            const response = await fetch(`${API_BASE_URL}/friendships/${friendship.id}`, {
+            const response = await fetch(`${API_BASE_URL}/friendships/${friendship.id}/cancel`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
