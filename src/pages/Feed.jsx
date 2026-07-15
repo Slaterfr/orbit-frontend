@@ -297,7 +297,13 @@ const Feed = () => {
                                     </button>
                                     <Link to={`/posts/${post.id}`} className="btn btn-ghost flex-center gap-2">
                                         <MessageSquare size={18} />
-                                        <span className="text-sm">{language === 'en' ? 'Comment' : 'Comentar'}</span>
+                                        <span className="text-sm">
+                                            {post.comment_count !== undefined 
+                                                ? `${post.comment_count} ${post.comment_count === 1 
+                                                    ? (language === 'en' ? 'Comment' : 'Comentario') 
+                                                    : (language === 'en' ? 'Comments' : 'Comentarios')}` 
+                                                : (language === 'en' ? 'Comment' : 'Comentario')}
+                                        </span>
                                     </Link>
                                 </div>
                             </div>

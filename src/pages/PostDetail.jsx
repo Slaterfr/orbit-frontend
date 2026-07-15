@@ -194,29 +194,13 @@ const PostDetail = () => {
             if (response.ok) {
                 const data = await response.json();
 
-                // Fetch stats for each comment
-                const commentsWithStats = await Promise.all(data.map(async (c) => {
-                    try {
-                        const statsRes = await fetch(`${API_BASE_URL}/vote/comment/${c.id}`, {
-                            headers: { 'Authorization': `Bearer ${token}` }
-                        });
-                        if (statsRes.ok) {
-                            const stats = await statsRes.json();
-                            return { ...c, vote_count: stats.vote_count, user_voted: stats.user_voted };
-                        }
-                    } catch (e) {
-                        console.error("Failed to fetch comment stats " + c.id, e);
-                    }
-                    return { ...c, vote_count: 0, user_voted: false };
-                }));
-
                 // Organize comments into tree
                 const commentMap = {};
                 const roots = [];
-                commentsWithStats.forEach(c => {
+                data.forEach(c => {
                     commentMap[c.id] = { ...c, replies: [] };
                 });
-                commentsWithStats.forEach(c => {
+                data.forEach(c => {
                     if (c.parent_id) {
                         if (commentMap[c.parent_id]) {
                             commentMap[c.parent_id].replies.push(commentMap[c.id]);
@@ -501,7 +485,7 @@ const PostDetail = () => {
             )}
 
             <div className="card">
-                <h3 className="text-lg mb-4">{t('postDetail.commentsSection')}</h3>
+                <h3 className="text-lg mb-4">{t('postDetail.commentsSection')} ({comments.length})</h3>
  
                 <form onSubmit={handleSubmitComment} className="mb-4">
                     {replyTo && (
