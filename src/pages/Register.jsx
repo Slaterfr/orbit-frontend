@@ -68,7 +68,12 @@ const Register = () => {
                 {error && <div style={{ color: 'var(--error)', marginBottom: '1rem', textAlign: 'center' }}>{error}</div>}
                 <form onSubmit={handleSubmit}>
                     <div className="mb-4">
-                        <label className="text-sm text-secondary">{t('auth.username')}</label>
+                        <label className="text-sm text-secondary">
+                            {t('auth.username')}
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', opacity: 0.7, marginLeft: '4px' }}>
+                                {language === 'en' ? '(3-50 chars)' : '(3-50 caracteres)'}
+                            </span>
+                        </label>
                         <input
                             type="text"
                             className="input mt-2"
@@ -78,7 +83,12 @@ const Register = () => {
                         />
                     </div>
                     <div className="mb-4">
-                        <label className="text-sm text-secondary">{t('auth.email')}</label>
+                        <label className="text-sm text-secondary">
+                            {t('auth.email')}
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', opacity: 0.7, marginLeft: '4px' }}>
+                                {language === 'en' ? '(valid email)' : '(correo válido)'}
+                            </span>
+                        </label>
                         <input
                             type="email"
                             className="input mt-2"
@@ -88,7 +98,12 @@ const Register = () => {
                         />
                     </div>
                     <div className="mb-4">
-                        <label className="text-sm text-secondary">{t('auth.password')}</label>
+                        <label className="text-sm text-secondary">
+                            {t('auth.password')}
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', opacity: 0.7, marginLeft: '4px' }}>
+                                {language === 'en' ? '(min 8 chars, 1 uppercase, 1 digit)' : '(mín 8 caracteres, 1 mayúscula, 1 número)'}
+                            </span>
+                        </label>
                         <input
                             type="password"
                             className="input mt-2"
@@ -98,7 +113,12 @@ const Register = () => {
                         />
                     </div>
                     <div className="mb-4">
-                        <label className="text-sm text-secondary">{t('auth.bio')}</label>
+                        <label className="text-sm text-secondary">
+                            {t('auth.bio')}
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', opacity: 0.7, marginLeft: '4px' }}>
+                                {language === 'en' ? '(max 500 chars)' : '(máx 500 caracteres)'}
+                            </span>
+                        </label>
                         <textarea
                             className="input mt-2"
                             value={formData.bio}
