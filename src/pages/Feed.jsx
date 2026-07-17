@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { MessageSquare, Heart, Share2, User as UserIcon, Camera, X } from 'lucide-react';
+import { MessageSquare, Heart, Share2, User as UserIcon, Camera, X, Megaphone } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { useLanguage } from '../context/LanguageContext';
 import { parseApiError } from '../utils/errorParser';
@@ -13,6 +13,8 @@ const Feed = () => {
     const [previewUrl, setPreviewUrl] = useState('');
     const [uploading, setUploading] = useState(false);
     const [createError, setCreateError] = useState('');
+    const [announcements, setAnnouncements] = useState([]);
+    const [postType, setPostType] = useState('post');
     const { token, user } = useAuth();
     const { language, t } = useLanguage();
 
@@ -67,8 +69,23 @@ const Feed = () => {
         }
     };
 
+    const fetchAnnouncements = async () => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/posts/announcements`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setAnnouncements(data);
+            }
+        } catch (error) {
+            console.error("Failed to fetch announcements", error);
+        }
+    };
+
     useEffect(() => {
         fetchPosts();
+        fetchAnnouncements();
     }, [token]);
 
     const handleCreatePost = async (e) => {
@@ -106,7 +123,7 @@ const Feed = () => {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ ...newPost, published: true, media_ids: mediaIds })
+                body: JSON.stringify({ ...newPost, published: true, media_ids: mediaIds, type: postType })
             });
 
             if (!response.ok) {
@@ -115,9 +132,11 @@ const Feed = () => {
             }
 
             setNewPost({ title: '', content: '' });
+            setPostType('post');
             setSelectedFile(null);
             setPreviewUrl('');
             fetchPosts();
+            fetchAnnouncements();
         } catch (error) {
             setCreateError(error.message || 'Failed to create post');
             console.error(error);
@@ -144,10 +163,75 @@ const Feed = () => {
         }
     };
 
+    const announcementsCardStyle = {
+        backgroundColor: 'rgba(245, 158, 11, 0.08)',
+        border: '1px solid rgba(245, 158, 11, 0.2)',
+        borderRadius: '12px',
+        padding: '16px',
+        boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.1)',
+        backdropFilter: 'blur(8px)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '8px',
+        transition: 'all 0.2s ease',
+        cursor: 'pointer'
+    };
+
     return (
-        <div style={{ maxWidth: 600, margin: '0 auto' }}>
-            {/* Create Post */}
-            <div className="card mb-4">
+        <div className="feed-layout-container" style={{
+            display: 'flex',
+            gap: '24px',
+            maxWidth: '1200px',
+            margin: '0 auto',
+            alignItems: 'flex-start'
+        }}>
+            {/* Left Column - Communities Sidebar */}
+            <div className="communities-sidebar" style={{
+                width: '240px',
+                flexShrink: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1rem',
+                position: 'sticky',
+                top: '24px',
+                height: 'fit-content'
+            }}>
+                <div className="card" style={{
+                    padding: '20px',
+                    backgroundColor: 'rgba(24, 24, 27, 0.65)',
+                    backdropFilter: 'blur(12px)',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.2)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '12px'
+                }}>
+                    <h3 className="text-lg" style={{ margin: 0, fontWeight: 700, borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
+                        {language === 'en' ? 'Communities' : 'Comunidades'}
+                    </h3>
+                    <p className="text-secondary text-sm" style={{ margin: '8px 0', lineHeight: '1.4' }}>
+                        {language === 'en' 
+                            ? 'Discover and join interest groups to connect with others.' 
+                            : 'Descubre y únete a grupos de interés para conectar con otros.'}
+                    </p>
+                    <span style={{
+                        fontSize: '0.75rem',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        color: '#60a5fa',
+                        padding: '4px 8px',
+                        borderRadius: '6px',
+                        fontWeight: 600,
+                        alignSelf: 'flex-start'
+                    }}>
+                        {language === 'en' ? 'Coming Soon' : 'Próximamente'}
+                    </span>
+                </div>
+            </div>
+
+            {/* Middle Column - Main Feed */}
+            <div style={{ flex: 1, minWidth: 0, maxWidth: 600 }}>
+                {/* Create Post */}
+                <div className="card mb-4">
                 <form onSubmit={handleCreatePost}>
                     <input
                         className="input mb-4"
@@ -195,6 +279,42 @@ const Feed = () => {
                     {createError && (
                         <div style={{ color: 'var(--error)', fontSize: '0.85rem', marginBottom: '12px' }}>
                             {createError}
+                        </div>
+                    )}
+
+                    {/* Add toggle for Announcement if Admin */}
+                    {user && user.role === 'admin' && (
+                        <div style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: '8px', 
+                            marginBottom: '16px',
+                            backgroundColor: 'rgba(245, 158, 11, 0.05)',
+                            padding: '8px 12px',
+                            borderRadius: '8px',
+                            border: '1px solid rgba(245, 158, 11, 0.15)'
+                        }}>
+                            <Megaphone size={16} color="#f59e0b" />
+                            <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                                {language === 'en' ? 'Post as:' : 'Publicar como:'}
+                            </span>
+                            <select
+                                value={postType}
+                                onChange={(e) => setPostType(e.target.value)}
+                                className="input"
+                                style={{
+                                    width: 'auto',
+                                    padding: '2px 8px',
+                                    fontSize: '0.85rem',
+                                    margin: 0,
+                                    backgroundColor: 'var(--bg-secondary)',
+                                    borderColor: 'var(--border-color)',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                <option value="post">{language === 'en' ? 'Standard Post' : 'Publicación Estándar'}</option>
+                                <option value="announcement">{language === 'en' ? 'Official Announcement' : 'Anuncio Oficial'}</option>
+                            </select>
                         </div>
                     )}
 
@@ -310,6 +430,97 @@ const Feed = () => {
                         </div>
                     ))
                 )}
+            </div>
+            </div>
+
+            {/* Announcements Sidebar Panel */}
+            <div className="announcements-sidebar" style={{
+                width: '320px',
+                flexShrink: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1rem',
+                position: 'sticky',
+                top: '24px',
+                height: 'fit-content'
+            }}>
+                <div className="card" style={{
+                    padding: '20px',
+                    backgroundColor: 'rgba(24, 24, 27, 0.65)',
+                    backdropFilter: 'blur(12px)',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.2)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '16px'
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
+                        <Megaphone size={20} color="#f59e0b" />
+                        <h3 className="text-lg" style={{ margin: 0, fontWeight: 700, color: 'var(--text-primary)' }}>
+                            {language === 'en' ? 'Announcements' : 'Anuncios'}
+                        </h3>
+                    </div>
+
+                    {announcements.length === 0 ? (
+                        <p className="text-secondary text-sm" style={{ textAlign: 'center', margin: '16px 0' }}>
+                            {language === 'en' ? 'No active announcements.' : 'No hay anuncios activos.'}
+                        </p>
+                    ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            {announcements.map((ann) => (
+                                <Link 
+                                    to={`/posts/${ann.id}`} 
+                                    key={ann.id}
+                                    style={{ textDecoration: 'none' }}
+                                >
+                                    <div 
+                                        style={announcementsCardStyle}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.transform = 'translateY(-2px)';
+                                            e.currentTarget.style.backgroundColor = 'rgba(245, 158, 11, 0.12)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.transform = 'translateY(0)';
+                                            e.currentTarget.style.backgroundColor = 'rgba(245, 158, 11, 0.08)';
+                                        }}
+                                    >
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                            <span style={{
+                                                fontSize: '0.7rem',
+                                                backgroundColor: 'rgba(245, 158, 11, 0.2)',
+                                                color: '#fbbf24',
+                                                padding: '2px 6px',
+                                                borderRadius: '4px',
+                                                fontWeight: 600,
+                                                textTransform: 'uppercase'
+                                            }}>
+                                                {language === 'en' ? 'Official' : 'Oficial'}
+                                            </span>
+                                            <span className="text-secondary" style={{ fontSize: '0.7rem' }}>
+                                                {new Date(ann.created_at).toLocaleDateString()}
+                                            </span>
+                                        </div>
+                                        <h4 style={{ margin: '4px 0 0 0', color: '#fbbf24', fontSize: '0.95rem', fontWeight: 600 }}>
+                                            {ann.title}
+                                        </h4>
+                                        <p style={{ 
+                                            margin: 0, 
+                                            color: 'var(--text-secondary)', 
+                                            fontSize: '0.825rem',
+                                            lineHeight: '1.4',
+                                            display: '-webkit-box',
+                                            WebkitLineClamp: 3,
+                                            WebkitBoxOrient: 'vertical',
+                                            overflow: 'hidden'
+                                        }}>
+                                            {ann.content}
+                                        </p>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

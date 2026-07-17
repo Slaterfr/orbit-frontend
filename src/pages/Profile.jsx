@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { User as UserIcon, UserPlus, UserMinus, UserCheck, UserX, Heart, MessageSquare, Edit2 } from 'lucide-react';
+import { User as UserIcon, UserPlus, UserMinus, UserCheck, UserX, Heart, MessageSquare, Edit2, Palette } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { useLanguage } from '../context/LanguageContext';
 import { parseApiError } from '../utils/errorParser';
+import { themes } from '../utils/themes';
 
 const Profile = () => {
     const { username } = useParams();
@@ -16,6 +17,7 @@ const Profile = () => {
     const [isEditingBio, setIsEditingBio] = useState(false);
     const [editBioText, setEditBioText] = useState('');
     const [bioError, setBioError] = useState('');
+    const [isSelectingTheme, setIsSelectingTheme] = useState(false);
     const { token, user, refreshUser } = useAuth();
     const { language, t } = useLanguage();
 
@@ -122,6 +124,19 @@ const Profile = () => {
         };
         if (username && token) fetchProfile();
     }, [username, token, user]);
+
+    useEffect(() => {
+        if (profile) {
+            const currentThemeIndex = profile.theme_preference || 0;
+            const theme = themes[currentThemeIndex] || themes[0];
+            document.body.style.background = theme.gradient;
+            document.body.style.backgroundAttachment = 'fixed';
+        }
+        return () => {
+            document.body.style.background = '';
+            document.body.style.backgroundAttachment = '';
+        };
+    }, [profile]);
 
     const handleSendRequest = async () => {
         try {
@@ -259,6 +274,29 @@ const Profile = () => {
         }
     };
 
+    const handleSelectTheme = async (themeId) => {
+        setProfile(prev => ({ ...prev, theme_preference: themeId }));
+        try {
+            const response = await fetch(`${API_BASE_URL}/users/me`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ theme_preference: themeId })
+            });
+            if (response.ok) {
+                if (refreshUser) {
+                    refreshUser();
+                }
+            } else {
+                console.error("Failed to persist theme preference");
+            }
+        } catch (e) {
+            console.error("Error updating profile theme", e);
+        }
+    };
+
     if (notFound) {
         return (
             <div className="container mt-4" style={{ maxWidth: 600 }}>
@@ -325,10 +363,37 @@ const Profile = () => {
         return null;
     };
 
+    const currentThemeIndex = profile?.theme_preference || 0;
+    const currentTheme = themes[currentThemeIndex] || themes[0];
+
+    const cardStyle = {
+        backgroundColor: 'rgba(24, 24, 27, 0.75)',
+        backdropFilter: 'blur(12px)',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
+        boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.2)'
+    };
+
     return (
         <div className="container mt-4" style={{ maxWidth: 600 }}>
-            <div className="card flex-center profile-card" style={{ flexDirection: 'column', gap: '1rem' }}>
-                <div style={{ position: 'relative', width: 100, height: 100 }}>
+            <div className="card flex-center profile-card" style={{ 
+                flexDirection: 'column', 
+                gap: '1rem',
+                position: 'relative',
+                overflow: 'hidden',
+                paddingTop: '100px',
+                ...cardStyle
+            }}>
+                <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '140px',
+                    background: currentTheme.gradient,
+                    zIndex: 0
+                }} />
+
+                <div style={{ position: 'relative', width: 100, height: 100, zIndex: 1, marginTop: '-50px' }}>
                     <div style={{
                         width: 100,
                         height: 100,
@@ -338,7 +403,8 @@ const Profile = () => {
                         alignItems: 'center',
                         justifyContent: 'center',
                         overflow: 'hidden',
-                        border: '2px solid var(--border-color)'
+                        border: '4px solid var(--card-bg, var(--bg-secondary))',
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
                     }}>
                         {profile.avatar_url ? (
                             <img src={profile.avatar_url} alt="Profile Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -348,11 +414,70 @@ const Profile = () => {
                     </div>
                 </div>
                 {isCurrentUser && (
-                    <Link to="/upload-avatar" className="btn btn-ghost" style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', marginTop: '-8px' }}>
+                    <Link to="/upload-avatar" className="btn btn-ghost" style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', marginTop: '-8px', zIndex: 1 }}>
                         {t('profile.changePic')}
                     </Link>
                 )}
-                <h2 className="text-xl">{profile.username}</h2>
+                
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', zIndex: 1 }}>
+                    <h2 className="text-xl" style={{ margin: 0 }}>{profile.username}</h2>
+                    {isCurrentUser && (
+                        <button
+                            onClick={() => setIsSelectingTheme(!isSelectingTheme)}
+                            className="btn btn-ghost"
+                            style={{ padding: '6px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                            title="Customize Profile Theme"
+                        >
+                            <Palette size={18} color={isSelectingTheme ? currentTheme.primary : "var(--text-secondary)"} />
+                        </button>
+                    )}
+                </div>
+
+                {isCurrentUser && isSelectingTheme && (
+                    <div className="card" style={{
+                        width: '100%',
+                        maxWidth: '440px',
+                        padding: '16px',
+                        backgroundColor: 'var(--bg-tertiary)',
+                        border: '1px solid var(--border-color)',
+                        borderRadius: '12px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '12px',
+                        zIndex: 1,
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                        margin: '8px 0'
+                    }}>
+                        <h4 style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)', textAlign: 'center' }}>
+                            {language === 'en' ? 'Select Profile Theme' : 'Selecciona el Tema del Perfil'}
+                        </h4>
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(4, 1fr)',
+                            gap: '12px',
+                            justifyItems: 'center'
+                        }}>
+                            {themes.map((t) => (
+                                <button
+                                    key={t.id}
+                                    onClick={() => handleSelectTheme(t.id)}
+                                    style={{
+                                        width: '40px',
+                                        height: '40px',
+                                        borderRadius: '50%',
+                                        background: t.gradient,
+                                        border: profile.theme_preference === t.id ? '3px solid var(--text-primary)' : '2px solid transparent',
+                                        cursor: 'pointer',
+                                        boxShadow: '0 2px 6px rgba(0, 0, 0, 0.2)',
+                                        transition: 'transform 0.2s',
+                                        transform: profile.theme_preference === t.id ? 'scale(1.15)' : 'scale(1)'
+                                    }}
+                                    title={t.name}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                )}
                 {isEditingBio ? (
                     <div style={{ width: '100%', maxWidth: '400px', display: 'flex', flexDirection: 'column', gap: '8px', margin: '8px 0' }}>
                         <textarea
@@ -423,7 +548,7 @@ const Profile = () => {
             </div>
  
             {/* Friends Section */}
-            <div className="card mt-4" style={{ width: '100%' }}>
+            <div className="card mt-4" style={{ width: '100%', ...cardStyle }}>
                 <h3 className="text-lg mb-4">{t('profile.friends')} ({friends.length})</h3>
                 {friends.length === 0 ? (
                     <p className="text-secondary text-sm">{language === 'en' ? 'No friends yet.' : 'Aún no hay amigos.'}</p>
@@ -463,7 +588,7 @@ const Profile = () => {
                 ) : (
                     <div className="flex-center" style={{ flexDirection: 'column', gap: '1rem', width: '100%' }}>
                         {posts.map(post => (
-                            <div key={post.id} className="card" style={{ width: '100%', textAlign: 'left' }}>
+                            <div key={post.id} className="card" style={{ width: '100%', textAlign: 'left', ...cardStyle }}>
                                 <div className="flex-between mb-4">
                                     <div className="flex-center gap-2">
                                         <div style={{
