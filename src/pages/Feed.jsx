@@ -5,6 +5,7 @@ import { MessageSquare, Heart, Share2, User as UserIcon, Camera, X, Megaphone } 
 import { API_BASE_URL } from '../config';
 import { useLanguage } from '../context/LanguageContext';
 import { parseApiError } from '../utils/errorParser';
+import { useToast } from '../context/ToastContext';
 
 const Feed = () => {
     const [posts, setPosts] = useState([]);
@@ -17,6 +18,7 @@ const Feed = () => {
     const [postType, setPostType] = useState('post');
     const { token, user } = useAuth();
     const { language, t } = useLanguage();
+    const { showToast } = useToast();
 
     const handleFileChange = (e) => {
         setCreateError('');
@@ -196,16 +198,30 @@ const Feed = () => {
                 top: '24px',
                 height: 'fit-content'
             }}>
-                <div className="card" style={{
-                    padding: '20px',
-                    backgroundColor: 'rgba(24, 24, 27, 0.65)',
-                    backdropFilter: 'blur(12px)',
-                    border: '1px solid rgba(255, 255, 255, 0.08)',
-                    boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.2)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '12px'
-                }}>
+                <div 
+                    className="card" 
+                    onClick={() => showToast(language === 'en' ? 'Communities feature coming soon!' : '¡La función de comunidades llegará pronto!')}
+                    style={{
+                        padding: '20px',
+                        backgroundColor: 'rgba(24, 24, 27, 0.65)',
+                        backdropFilter: 'blur(12px)',
+                        border: '1px solid rgba(255, 255, 255, 0.08)',
+                        boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.2)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '12px',
+                        cursor: 'pointer',
+                        transition: 'transform 0.2s ease, border-color 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+                    }}
+                >
                     <h3 className="text-lg" style={{ margin: 0, fontWeight: 700, borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
                         {language === 'en' ? 'Communities' : 'Comunidades'}
                     </h3>
@@ -231,7 +247,7 @@ const Feed = () => {
             {/* Middle Column - Main Feed */}
             <div style={{ flex: 1, minWidth: 0, maxWidth: 600 }}>
                 {/* Create Post */}
-                <div className="card mb-4">
+                <div className="card mb-4 hide-mobile">
                 <form onSubmit={handleCreatePost}>
                     <input
                         className="input mb-4"
@@ -336,6 +352,62 @@ const Feed = () => {
                     </div>
                 </form>
             </div>
+
+            {/* Mobile-Only Latest Announcement Banner */}
+            {announcements.length > 0 && (
+                <Link 
+                    to={`/posts/${announcements[0].id}`}
+                    style={{ textDecoration: 'none' }}
+                    className="hide-desktop"
+                >
+                    <div className="card mb-4" style={{
+                        padding: '16px',
+                        backgroundColor: 'rgba(245, 158, 11, 0.08)',
+                        border: '1px solid rgba(245, 158, 11, 0.25)',
+                        borderRadius: '12px',
+                        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '8px',
+                        cursor: 'pointer'
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'space-between' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <Megaphone size={16} color="#fbbf24" />
+                                <span style={{
+                                    fontSize: '0.7rem',
+                                    backgroundColor: 'rgba(245, 158, 11, 0.2)',
+                                    color: '#fbbf24',
+                                    padding: '2px 6px',
+                                    borderRadius: '4px',
+                                    fontWeight: 600,
+                                    textTransform: 'uppercase'
+                                }}>
+                                    {language === 'en' ? 'Latest Announcement' : 'Último Anuncio'}
+                                </span>
+                            </div>
+                            <span className="text-secondary" style={{ fontSize: '0.7rem' }}>
+                                {new Date(announcements[0].created_at).toLocaleDateString()}
+                            </span>
+                        </div>
+                        <h4 style={{ margin: '4px 0 0 0', color: '#fbbf24', fontSize: '0.95rem', fontWeight: 700 }}>
+                            {announcements[0].title}
+                        </h4>
+                        <p style={{
+                            margin: 0,
+                            color: 'var(--text-secondary)',
+                            fontSize: '0.825rem',
+                            lineHeight: '1.4',
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden'
+                        }}>
+                            {announcements[0].content}
+                        </p>
+                    </div>
+                </Link>
+            )}
 
             {/* Posts List */}
             <div className="flex-center" style={{ flexDirection: 'column', gap: '1rem', width: '100%' }}>
