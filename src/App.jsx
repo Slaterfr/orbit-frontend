@@ -8,6 +8,7 @@ import Profile from './pages/Profile';
 import PostDetail from './pages/PostDetail';
 import UploadAvatar from './pages/UploadAvatar';
 import CreatePost from './pages/CreatePost';
+import Suggestions from './pages/Suggestions';
 import PrivateRoute from './components/PrivateRoute';
 import Navbar from './components/Navbar';
 import BottomNav from './components/BottomNav';
@@ -43,6 +44,15 @@ function App() {
                      <Navbar />
                      <div className="container mt-4">
                        <CreatePost />
+                     </div>
+                     <BottomNav />
+                   </>
+                } />
+                <Route path="/suggestions" element={
+                   <>
+                     <Navbar />
+                     <div className="container mt-4">
+                       <Suggestions />
                      </div>
                      <BottomNav />
                    </>

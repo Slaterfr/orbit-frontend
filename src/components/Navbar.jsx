@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Home, User, LogOut, Bell, Check, X, Search } from 'lucide-react';
+import { Home, User, LogOut, Bell, Check, X, Search, Lightbulb } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useState, useEffect, useRef } from 'react';
 import { API_BASE_URL } from '../config';
@@ -138,6 +138,12 @@ const Navbar = () => {
                     <Link to="/" className="btn btn-ghost">
                         <Home size={20} />
                     </Link>
+
+                    {token && (
+                        <Link to="/suggestions" className="btn btn-ghost" title={language === 'en' ? 'Suggestions Board' : 'Buzón de Sugerencias'}>
+                            <Lightbulb size={20} />
+                        </Link>
+                    )}
 
                     {user && (
                         <Link to={`/users/${user.username || 'me'}`} className="btn btn-ghost">
