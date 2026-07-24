@@ -4,11 +4,13 @@ import { useAuth } from '../context/AuthContext';
 import { useState, useEffect, useRef } from 'react';
 import { API_BASE_URL } from '../config';
 import { useLanguage } from '../context/LanguageContext';
+import { useToast } from '../context/ToastContext';
 
 const Navbar = () => {
     const { logout, user, token } = useAuth();
     const navigate = useNavigate();
     const { language, toggleLanguage, t } = useLanguage();
+    const { showToast } = useToast();
     const [showNotifications, setShowNotifications] = useState(false);
     const [notifications, setNotifications] = useState([]);
     const dropdownRef = useRef(null);
@@ -73,6 +75,36 @@ const Navbar = () => {
             }
         } catch (e) {
             console.error("Failed to respond to friendship request", e);
+        }
+    };
+
+    const handleRespondInvite = async (communityId, inviteId, action) => {
+        try {
+            if (action === 'accepted') {
+                const response = await fetch(`${API_BASE_URL}/communities/${communityId}/join`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (response.ok) {
+                    showToast(language === 'en' ? 'Joined successfully!' : '¡Te has unido con éxito!');
+                    fetchNotifications();
+                }
+            } else {
+                const response = await fetch(`${API_BASE_URL}/communities/${communityId}/join-requests/${inviteId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ status: 'rejected' })
+                });
+                if (response.ok) {
+                    showToast(language === 'en' ? 'Invitation declined.' : 'Invitación rechazada.');
+                    fetchNotifications();
+                }
+            }
+        } catch (e) {
+            console.error("Failed to respond to community invitation", e);
         }
     };
 
@@ -202,52 +234,74 @@ const Navbar = () => {
                                     className="notifications-dropdown"
                                 >
                                     <div className="dropdown-header">
-                                        {t('navbar.friendRequests')}
+                                        {language === 'en' ? 'Notifications' : 'Notificaciones'}
                                     </div>
                                     {notifications.length === 0 ? (
                                         <div className="dropdown-empty">
-                                            {t('navbar.noRequests')}
+                                            {language === 'en' ? 'No pending notifications' : 'Sin notificaciones pendientes'}
                                         </div>
                                     ) : (
                                         <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                            {notifications.map(notif => (
-                                                <div
-                                                    key={notif.id}
-                                                    className="dropdown-item"
-                                                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}
-                                                >
-                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1, textAlign: 'left' }}>
-                                                        <Link
-                                                            to={`/users/${notif.sender_username}`}
-                                                            onClick={() => setShowNotifications(false)}
-                                                            style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}
-                                                        >
-                                                            {notif.sender_username}
-                                                        </Link>
-                                                        <span className="text-secondary" style={{ fontSize: '0.75rem' }}>
-                                                            {t('navbar.sentRequest')}
-                                                        </span>
+                                            {notifications.map(notif => {
+                                                const isFriendReq = notif.type === 'friend_request';
+                                                return (
+                                                    <div
+                                                        key={notif.id}
+                                                        className="dropdown-item"
+                                                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}
+                                                    >
+                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1, textAlign: 'left' }}>
+                                                            {isFriendReq ? (
+                                                                <Link
+                                                                    to={`/users/${notif.sender_username}`}
+                                                                    onClick={() => setShowNotifications(false)}
+                                                                    style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}
+                                                                >
+                                                                    {notif.sender_username}
+                                                                </Link>
+                                                            ) : (
+                                                                <Link
+                                                                    to={`/communities`}
+                                                                    onClick={() => setShowNotifications(false)}
+                                                                    style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}
+                                                                >
+                                                                    {notif.sender_username}
+                                                                </Link>
+                                                            )}
+                                                            <span className="text-secondary" style={{ fontSize: '0.75rem' }}>
+                                                                {isFriendReq 
+                                                                    ? (language === 'en' ? 'sent you a friend request' : 'te envió una solicitud de amistad')
+                                                                    : (language === 'en' ? 'invited you to join' : 'te invitó a unirte')
+                                                                }
+                                                            </span>
+                                                        </div>
+                                                        <div className="flex-center gap-2">
+                                                            <button
+                                                                className="btn btn-primary"
+                                                                style={{ padding: '6px', borderRadius: '50%', backgroundColor: 'var(--success)' }}
+                                                                onClick={() => isFriendReq 
+                                                                    ? handleRespondRequest(notif.ref_id, 'accepted')
+                                                                    : handleRespondInvite(notif.ref_id, notif.id, 'accepted')
+                                                                }
+                                                                title="Accept"
+                                                            >
+                                                                <Check size={14} color="white" />
+                                                            </button>
+                                                            <button
+                                                                className="btn btn-primary"
+                                                                style={{ padding: '6px', borderRadius: '50%', backgroundColor: 'var(--error)' }}
+                                                                onClick={() => isFriendReq
+                                                                    ? handleRespondRequest(notif.ref_id, 'rejected')
+                                                                    : handleRespondInvite(notif.ref_id, notif.id, 'rejected')
+                                                                }
+                                                                title="Reject"
+                                                            >
+                                                                <X size={14} color="white" />
+                                                            </button>
+                                                        </div>
                                                     </div>
-                                                    <div className="flex-center gap-2">
-                                                        <button
-                                                            className="btn btn-primary"
-                                                            style={{ padding: '6px', borderRadius: '50%', backgroundColor: 'var(--success)' }}
-                                                            onClick={() => handleRespondRequest(notif.ref_id, 'accepted')}
-                                                            title="Accept"
-                                                        >
-                                                            <Check size={14} color="white" />
-                                                        </button>
-                                                        <button
-                                                            className="btn btn-primary"
-                                                            style={{ padding: '6px', borderRadius: '50%', backgroundColor: 'var(--error)' }}
-                                                            onClick={() => handleRespondRequest(notif.ref_id, 'rejected')}
-                                                            title="Reject"
-                                                        >
-                                                            <X size={14} color="white" />
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            ))}
+                                                );
+                                            })}
                                         </div>
                                     )}
                                 </div>

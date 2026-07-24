@@ -29,6 +29,10 @@ const CommunityChat = () => {
     const [showSidebar, setShowSidebar] = useState(true); // Toggle on mobile
     const [showRequestsModal, setShowRequestsModal] = useState(false);
     const [avatarUploading, setAvatarUploading] = useState(false);
+    const [showInviteModal, setShowInviteModal] = useState(false);
+    const [inviteUsername, setInviteUsername] = useState('');
+    const [inviteLoading, setInviteLoading] = useState(false);
+    const [inviteError, setInviteError] = useState('');
 
     // Refs
     const wsRef = useRef(null);
@@ -221,6 +225,37 @@ const CommunityChat = () => {
             }
         } catch (err) {
             console.error("Message delete failed", err);
+        }
+    };
+
+    const handleSendInvite = async (e) => {
+        e.preventDefault();
+        setInviteError('');
+        if (!inviteUsername.trim()) return;
+
+        setInviteLoading(true);
+        try {
+            const res = await fetch(`${API_BASE_URL}/communities/${id}/invite`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ username: inviteUsername.trim() })
+            });
+
+            if (res.ok) {
+                showToast(language === 'en' ? 'Invitation sent successfully!' : '¡Invitación enviada con éxito!');
+                setInviteUsername('');
+                setShowInviteModal(false);
+            } else {
+                const errData = await res.json();
+                setInviteError(parseApiError(errData, 'Failed to send invitation'));
+            }
+        } catch (err) {
+            setInviteError(language === 'en' ? 'Network error occurred.' : 'Ocurrió un error de red.');
+        } finally {
+            setInviteLoading(false);
         }
     };
 
@@ -712,9 +747,22 @@ const CommunityChat = () => {
 
                     {/* Members List */}
                     <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                        <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)', alignSelf: 'flex-start' }}>
-                            {language === 'en' ? 'MEMBERS' : 'MIEMBROS'} ({members.length})
-                        </span>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                                {language === 'en' ? 'MEMBERS' : 'MIEMBROS'} ({members.length})
+                            </span>
+                            {(community.role_in_community === 'owner' || community.role_in_community === 'moderator') && (
+                                <button
+                                    onClick={() => setShowInviteModal(true)}
+                                    className="btn btn-ghost"
+                                    style={{ padding: '2px 8px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px', border: '1px solid var(--border-color)', borderRadius: '6px' }}
+                                    title={language === 'en' ? 'Invite user' : 'Invitar usuario'}
+                                >
+                                    <span>+</span>
+                                    <span>{language === 'en' ? 'Invite' : 'Invitar'}</span>
+                                </button>
+                            )}
+                        </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                             {members.map((mbr) => {
@@ -913,6 +961,75 @@ const CommunityChat = () => {
                                 ))}
                             </div>
                         )}
+                    </div>
+                </div>
+            )}
+
+            {/* Invite User Modal */}
+            {showInviteModal && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100vw',
+                    height: '100vh',
+                    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 2000,
+                    backdropFilter: 'blur(4px)'
+                }}>
+                    <div className="card" style={{ width: '90%', maxWidth: '400px', position: 'relative', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <h3 style={{ margin: 0, fontWeight: 700 }}>
+                                {language === 'en' ? 'Invite Member' : 'Invitar Miembro'}
+                            </h3>
+                            <button onClick={() => { setShowInviteModal(false); setInviteError(''); }} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}>
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleSendInvite} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                                    {language === 'en' ? 'Username' : 'Nombre de Usuario'}
+                                </label>
+                                <input
+                                    type="text"
+                                    className="input"
+                                    placeholder={language === 'en' ? "Enter username to invite" : "Ingrese nombre de usuario a invitar"}
+                                    value={inviteUsername}
+                                    onChange={(e) => setInviteUsername(e.target.value)}
+                                    required
+                                    autoFocus
+                                />
+                            </div>
+
+                            {inviteError && (
+                                <div style={{ color: 'var(--error)', fontSize: '0.85rem' }}>
+                                    {inviteError}
+                                </div>
+                            )}
+
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '8px' }}>
+                                <button
+                                    type="button"
+                                    className="btn btn-ghost"
+                                    onClick={() => { setShowInviteModal(false); setInviteError(''); }}
+                                    disabled={inviteLoading}
+                                >
+                                    {language === 'en' ? 'Cancel' : 'Cancelar'}
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="btn btn-primary"
+                                    disabled={inviteLoading}
+                                >
+                                    {inviteLoading ? (language === 'en' ? 'Inviting...' : 'Invitando...') : (language === 'en' ? 'Send Invite' : 'Enviar Invitación')}
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             )}

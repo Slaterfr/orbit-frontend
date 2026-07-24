@@ -10,6 +10,7 @@ import { parseApiError } from '../utils/errorParser';
 const Communities = () => {
     const [publicCommunities, setPublicCommunities] = useState([]);
     const [myCommunities, setMyCommunities] = useState([]);
+    const [invitations, setInvitations] = useState([]);
     const [activeTab, setActiveTab] = useState('all'); // 'all' or 'my'
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
@@ -46,6 +47,15 @@ const Communities = () => {
             if (myResponse.ok) {
                 const myData = await myResponse.json();
                 setMyCommunities(myData);
+            }
+
+            // Fetch invitations
+            const inviteResponse = await fetch(`${API_BASE_URL}/communities/invitations`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (inviteResponse.ok) {
+                const inviteData = await inviteResponse.json();
+                setInvitations(inviteData);
             }
         } catch (err) {
             console.error("Failed to fetch communities", err);
@@ -127,6 +137,27 @@ const Communities = () => {
             }
         } catch (err) {
             console.error("Join community error", err);
+        }
+    };
+
+    const handleRejectInvitation = async (communityId, requestId) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/communities/${communityId}/join-requests/${requestId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ status: 'rejected' })
+            });
+            if (response.ok) {
+                showToast(language === 'en' ? 'Invitation declined.' : 'Invitación rechazada.');
+                fetchAllData();
+            } else {
+                showToast(language === 'en' ? 'Failed to decline invitation.' : 'Error al rechazar la invitación.');
+            }
+        } catch (err) {
+            console.error("Reject invitation error", err);
         }
     };
 
@@ -220,6 +251,58 @@ const Communities = () => {
                     </button>
                 </div>
             </div>
+
+            {/* Pending Invitations list */}
+            {invitations.length > 0 && (
+                <div className="card mb-4" style={{
+                    padding: '20px',
+                    backgroundColor: 'rgba(239, 68, 68, 0.05)',
+                    border: '1px solid rgba(239, 68, 68, 0.2)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '12px'
+                }}>
+                    <h3 className="text-lg" style={{ margin: 0, fontWeight: 700, color: '#f87171', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <ShieldAlert size={18} />
+                        {language === 'en' ? 'Community Invitations' : 'Invitaciones a Comunidades'} ({invitations.length})
+                    </h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        {invitations.map((space) => (
+                            <div key={space.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px', backgroundColor: 'rgba(0, 0, 0, 0.2)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <div style={{ width: 36, height: 36, borderRadius: '8px', backgroundColor: 'var(--bg-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '1px solid var(--border-color)' }}>
+                                        {space.avatar_url ? (
+                                            <img src={space.avatar_url} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        ) : (
+                                            <Users size={16} color="var(--text-secondary)" />
+                                        )}
+                                    </div>
+                                    <div>
+                                        <h4 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600 }}>{space.name}</h4>
+                                        <p className="text-secondary" style={{ margin: '2px 0 0 0', fontSize: '0.75rem' }}>{space.slogan}</p>
+                                    </div>
+                                </div>
+                                <div style={{ display: 'flex', gap: '8px' }}>
+                                    <button 
+                                        className="btn btn-primary"
+                                        style={{ fontSize: '0.75rem', padding: '6px 12px', backgroundColor: '#34d399', color: '#18181b', fontWeight: 600 }}
+                                        onClick={(e) => handleJoin(space.id, space.privacy, e)}
+                                    >
+                                        {language === 'en' ? 'Accept' : 'Aceptar'}
+                                    </button>
+                                    <button 
+                                        className="btn btn-ghost"
+                                        style={{ fontSize: '0.75rem', padding: '6px 12px', border: '1px solid var(--border-color)' }}
+                                        onClick={() => handleRejectInvitation(space.id, space.join_request_id)}
+                                    >
+                                        {language === 'en' ? 'Decline' : 'Rechazar'}
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {/* Tab Switches */}
             <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
