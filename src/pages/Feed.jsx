@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { MessageSquare, Heart, Share2, User as UserIcon, Camera, X, Megaphone } from 'lucide-react';
+import { MessageSquare, Heart, Share2, User as UserIcon, Camera, X, Megaphone, Users } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { useLanguage } from '../context/LanguageContext';
 import { parseApiError } from '../utils/errorParser';
@@ -16,9 +16,11 @@ const Feed = () => {
     const [createError, setCreateError] = useState('');
     const [announcements, setAnnouncements] = useState([]);
     const [postType, setPostType] = useState('post');
+    const [myCommunities, setMyCommunities] = useState([]);
     const { token, user } = useAuth();
     const { language, t } = useLanguage();
     const { showToast } = useToast();
+    const navigate = useNavigate();
 
     const handleFileChange = (e) => {
         setCreateError('');
@@ -85,9 +87,24 @@ const Feed = () => {
         }
     };
 
+    const fetchMyCommunities = async () => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/communities/my`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setMyCommunities(data);
+            }
+        } catch (error) {
+            console.error("Failed to fetch my communities", error);
+        }
+    };
+
     useEffect(() => {
         fetchPosts();
         fetchAnnouncements();
+        fetchMyCommunities();
     }, [token]);
 
     const handleCreatePost = async (e) => {
@@ -200,7 +217,6 @@ const Feed = () => {
             }}>
                 <div 
                     className="card" 
-                    onClick={() => showToast(language === 'en' ? 'Communities feature coming soon!' : '¡La función de comunidades llegará pronto!')}
                     style={{
                         padding: '20px',
                         backgroundColor: 'rgba(24, 24, 27, 0.65)',
@@ -210,37 +226,93 @@ const Feed = () => {
                         display: 'flex',
                         flexDirection: 'column',
                         gap: '12px',
-                        cursor: 'pointer',
                         transition: 'transform 0.2s ease, border-color 0.2s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = 'translateY(-2px)';
-                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.15)';
-                    }}
-                    onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = 'translateY(0)';
-                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
                     }}
                 >
                     <h3 className="text-lg" style={{ margin: 0, fontWeight: 700, borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
                         {language === 'en' ? 'Communities' : 'Comunidades'}
                     </h3>
-                    <p className="text-secondary text-sm" style={{ margin: '8px 0', lineHeight: '1.4' }}>
+                    <p className="text-secondary text-sm" style={{ margin: '4px 0 8px 0', lineHeight: '1.4' }}>
                         {language === 'en' 
                             ? 'Discover and join interest groups to connect with others.' 
                             : 'Descubre y únete a grupos de interés para conectar con otros.'}
                     </p>
-                    <span style={{
-                        fontSize: '0.75rem',
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                        color: '#60a5fa',
-                        padding: '4px 8px',
-                        borderRadius: '6px',
-                        fontWeight: 600,
-                        alignSelf: 'flex-start'
-                    }}>
-                        {language === 'en' ? 'Coming Soon' : 'Próximamente'}
-                    </span>
+
+                    {myCommunities.length > 0 ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '8px' }}>
+                            {myCommunities.slice(0, 5).map((space) => (
+                                <Link 
+                                    to={`/communities/${space.id}`} 
+                                    key={space.id}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '10px',
+                                        textDecoration: 'none',
+                                        padding: '6px 8px',
+                                        borderRadius: '8px',
+                                        backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                                        border: '1px solid rgba(255, 255, 255, 0.05)',
+                                        transition: 'background-color 0.2s ease',
+                                        minWidth: 0
+                                    }}
+                                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.08)'}
+                                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.03)'}
+                                >
+                                    <div style={{
+                                        width: 28,
+                                        height: 28,
+                                        borderRadius: '6px',
+                                        backgroundColor: 'var(--bg-tertiary)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        overflow: 'hidden',
+                                        border: '1px solid var(--border-color)',
+                                        flexShrink: 0
+                                    }}>
+                                        {space.avatar_url ? (
+                                            <img src={space.avatar_url} alt={space.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        ) : (
+                                            <Users size={14} color="var(--text-secondary)" />
+                                        )}
+                                    </div>
+                                    <span style={{
+                                        fontSize: '0.85rem',
+                                        fontWeight: 600,
+                                        color: 'var(--text-primary)',
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis'
+                                    }}>
+                                        {space.name}
+                                    </span>
+                                </Link>
+                            ))}
+                        </div>
+                    ) : (
+                        <p className="text-secondary" style={{ fontSize: '0.75rem', fontStyle: 'italic', margin: '0 0 8px 0' }}>
+                            {language === 'en' ? "You haven't joined any communities yet." : "Aún no te has unido a ninguna comunidad."}
+                        </p>
+                    )}
+
+                    <button 
+                        onClick={() => navigate('/communities')}
+                        className="btn btn-ghost"
+                        style={{
+                            fontSize: '0.8rem',
+                            padding: '6px 12px',
+                            width: '100%',
+                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                            border: '1px solid var(--border-color)',
+                            textAlign: 'center',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        {myCommunities.length > 0 
+                            ? (language === 'en' ? 'Explore Communities' : 'Explorar Comunidades')
+                            : (language === 'en' ? 'Find Communities' : 'Buscar Comunidades')}
+                    </button>
                 </div>
             </div>
 

@@ -9,6 +9,8 @@ import PostDetail from './pages/PostDetail';
 import UploadAvatar from './pages/UploadAvatar';
 import CreatePost from './pages/CreatePost';
 import Suggestions from './pages/Suggestions';
+import Communities from './pages/Communities';
+import CommunityChat from './pages/CommunityChat';
 import PrivateRoute from './components/PrivateRoute';
 import Navbar from './components/Navbar';
 import BottomNav from './components/BottomNav';
@@ -53,6 +55,24 @@ function App() {
                      <Navbar />
                      <div className="container mt-4">
                        <Suggestions />
+                     </div>
+                     <BottomNav />
+                   </>
+                } />
+                <Route path="/communities" element={
+                   <>
+                     <Navbar />
+                     <div className="container mt-4">
+                       <Communities />
+                     </div>
+                     <BottomNav />
+                   </>
+                } />
+                <Route path="/communities/:id" element={
+                   <>
+                     <Navbar />
+                     <div className="container mt-4">
+                       <CommunityChat />
                      </div>
                      <BottomNav />
                    </>

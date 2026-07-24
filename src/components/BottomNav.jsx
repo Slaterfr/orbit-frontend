@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Lightbulb, PlusCircle, User } from 'lucide-react';
+import { Home, PlusCircle, User, Users } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
 const BottomNav = () => {
@@ -15,17 +15,17 @@ const BottomNav = () => {
                 </span>
             </Link>
 
-            <Link to="/suggestions" className={`bottom-nav-btn ${location.pathname === '/suggestions' ? 'active' : ''}`}>
-                <Lightbulb size={20} />
-                <span style={{ fontSize: '0.65rem', marginTop: '2px' }}>
-                    {language === 'en' ? 'Ideas' : 'Ideas'}
-                </span>
-            </Link>
-
             <Link to="/create" className={`bottom-nav-btn ${location.pathname === '/create' ? 'active' : ''}`}>
                 <PlusCircle size={20} />
                 <span style={{ fontSize: '0.65rem', marginTop: '2px' }}>
                     {language === 'en' ? 'Create' : 'Crear'}
+                </span>
+            </Link>
+
+            <Link to="/communities" className={`bottom-nav-btn ${location.pathname.startsWith('/communities') ? 'active' : ''}`}>
+                <Users size={20} />
+                <span style={{ fontSize: '0.65rem', marginTop: '2px' }}>
+                    {language === 'en' ? 'Groups' : 'Grupos'}
                 </span>
             </Link>
 
