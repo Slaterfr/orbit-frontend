@@ -312,12 +312,12 @@ const Profile = () => {
         setBroadcastError('');
         setBroadcastSuccess('');
         
-        if (broadcastSubject.trim().length < 3) {
-            setBroadcastError(language === 'en' ? 'Subject must be at least 3 characters.' : 'El asunto debe tener al menos 3 caracteres.');
+        if (!broadcastSubject.trim()) {
+            setBroadcastError(language === 'en' ? 'Subject is required.' : 'El asunto es obligatorio.');
             return;
         }
-        if (broadcastBody.trim().length < 10) {
-            setBroadcastError(language === 'en' ? 'Body content must be at least 10 characters.' : 'El contenido del cuerpo debe tener al menos 10 caracteres.');
+        if (!broadcastBody.trim()) {
+            setBroadcastError(language === 'en' ? 'Body content is required.' : 'El contenido del cuerpo es obligatorio.');
             return;
         }
 
